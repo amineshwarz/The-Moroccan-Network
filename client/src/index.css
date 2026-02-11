@@ -1,6 +1,16 @@
 @import "tailwindcss";
 
 :root {
+
+  /* Coquelicot */
+  --color-primary: #ff3300;
+  /* Black Bean */
+  --color-dark: #330000;
+  /* Version claire du Coquelicot pour les fonds (calculée pour l'harmonie) */
+  --color-primary-light: #ffddcc;
+  /*--------------------------------*/
+
+  
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
