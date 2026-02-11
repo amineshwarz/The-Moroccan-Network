@@ -166,7 +166,7 @@ export const AdminEvents: React.FC = () => {
                   <td className="px-6 py-4">{new Date(event.date).toLocaleDateString()}</td>
                   <td className="px-6 py-4">{event.location}</td>
                   <td className="px-6 py-4">
-                     <div className="w-full bg-gray-200 rounded-full h-2.5 max-w-[100px]">
+                     <div className="w-full bg-gray-200 rounded-full h-2.5 max-w-25">
                       <div className="bg-primary h-2.5 rounded-full" style={{ width: `${(event.ticketsSold / event.capacity) * 100}%` }}></div>
                     </div>
                     <span className="text-xs text-gray-500 mt-1 block">{event.ticketsSold} / {event.capacity}</span>

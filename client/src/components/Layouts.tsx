@@ -81,7 +81,7 @@ export const PublicLayout: React.FC = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow">
+      <main className="grow">
         <Outlet />
       </main>
 
@@ -141,7 +141,7 @@ export const AdminLayout: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex">
       {/* Sidebar */}
-      <aside className="w-64 bg-dark text-white flex-shrink-0 hidden md:flex flex-col">
+      <aside className="w-64 bg-dark text-white hidden md:flex flex-col">
         <div className="p-6 border-b border-gray-800">
           <span className="text-xl font-bold">Admin Panel</span>
         </div>
