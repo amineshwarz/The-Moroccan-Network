@@ -19,7 +19,7 @@ import {
   AdminDashboard, 
   AdminEvents, 
   AdminTicketing 
-} from '../pages/AdminPages';
+} from '../pages/admin';
 
 const AppRouter: React.FC = () => {
   // On définit le tableau des routes
