@@ -3,8 +3,7 @@ import React from 'react';
 import { useRoutes, Navigate } from 'react-router-dom';
 
 // Import des Layouts
-import { PublicLayout, AdminLayout } from '../components/Layouts';
-
+import { PublicLayout, AdminLayout } from '../components/layouts';
 // Import des Pages Publiques
 import { 
   HomePage, 
