@@ -11,7 +11,7 @@ import {
   EventsPage, 
   NewsPage, 
   ContactPage 
-} from '../pages/PublicPages';
+} from '../pages/public';
 
 // Import des Pages Admin
 import { 
