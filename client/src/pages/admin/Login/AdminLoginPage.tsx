@@ -1,13 +1,45 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Mail } from 'lucide-react';
+import { Lock, Mail, Loader2 } from 'lucide-react'; // Ajout de Loader2 pour le spinner
+import { useAxios } from '../../../hooks/useAxios'; // Import de ton hook personnalisé
 
 export const AdminLoginPage: React.FC = () => {
+  // 1. Définition des états pour les champs du formulaire
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  // 2. Utilisation de ton hook useAxios
+  // request : la fonction pour appeler l'API
+  // loading : devient vrai pendant l'appel
+  // error   : contient le message d'erreur si Symfony renvoie une erreur
+  const { request, loading, error } = useAxios();
+
+  // 3. Logique de soumission du formulaire
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/admin/dashboard');
+    
+    try {
+      // On envoie la requête POST à Symfony
+      // Les données correspondent à ce que ton SecurityController attend
+      const data = await request('POST', '/api/login', {
+        email,
+        password
+      });
+
+      // Si la requête réussit :
+      // On stocke les infos de l'utilisateur (nom, rôles) dans le localStorage
+      // Cela nous servira à personnaliser l'affichage plus tard
+      localStorage.setItem('user', JSON.stringify(data));
+
+      // Redirection vers le tableau de bord
+      navigate('/admin/dashboard');
+      
+    } catch (err) {
+      // L'erreur est automatiquement capturée par le hook et affichée dans le composant via {error}
+      console.error("Échec de la connexion", err);
+    }
   };
 
   return (
@@ -18,23 +50,62 @@ export const AdminLoginPage: React.FC = () => {
           <h1 className="text-2xl font-bold text-dark">Administration</h1>
           <p className="text-gray-500">Accès réservé au bureau</p>
         </div>
+
         <form onSubmit={handleLogin} className="space-y-6">
+          
+          {/* 4. Affichage de l'erreur si Symfony renvoie une 401 ou 403 */}
+          {error && (
+            <div className="bg-red-50 border-l-4 border-primary text-primary p-3 rounded text-sm font-medium animate-pulse">
+              {error}
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-bold text-dark mb-1">Email</label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input type="email" className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary outline-none" placeholder="admin@asso.org" />
+              <input 
+                type="email" 
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading} // Désactivé pendant l'appel API
+                className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary outline-none transition disabled:opacity-50" 
+                placeholder="@" 
+              />
             </div>
           </div>
+
           <div>
             <label className="block text-sm font-bold text-dark mb-1">Mot de passe</label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input type="password" className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary outline-none" placeholder="••••••••" />
+              <input 
+                type="password" 
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={loading} // Désactivé pendant l'appel API
+                className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary outline-none transition disabled:opacity-50" 
+                placeholder="••••••••" 
+              />
             </div>
           </div>
-          <button type="submit" className="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-dark transition shadow-lg">
-            Se connecter
+
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-dark transition shadow-lg flex items-center justify-center space-x-2 disabled:bg-gray-400"
+          >
+            {/* 5. Feedback visuel du chargement */}
+            {loading ? (
+              <>
+                <Loader2 className="animate-spin" size={20} />
+                <span>Connexion en cours...</span>
+              </>
+            ) : (
+              <span>Se connecter</span>
+            )}
           </button>
         </form>
       </div>

@@ -26,11 +26,25 @@ security:
 
             # https://symfony.com/doc/current/security/impersonating_user.html
             # switch_user: true
+            # 2. CONNEXION JSON (Pour ton React)
+            json_login:
+                check_path: api_login
+                username_path: email
+                password_path: password
+
+            # 3. DÉCONNEXION
+            logout:
+                path: api_logout
 
     # Note: Only the *first* matching rule is applied
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        # Seul l'ADMIN peut voir les adhérents HelloAsso et gérer les invitations
+        - { path: ^/api/admin/subscribers, roles: ROLE_ADMIN }
+        - { path: ^/api/admin/invitations, roles: ROLE_ADMIN }
+        
+        # Le BUREAU (ROLE_USER) peut voir le reste de l'admin (Dashboard, événements)
+        # Note : L'Admin y a accès aussi car il hérite de ROLE_USER
+        - { path: ^/api/admin, roles: ROLE_USER }
 
 when@test:
     security:
