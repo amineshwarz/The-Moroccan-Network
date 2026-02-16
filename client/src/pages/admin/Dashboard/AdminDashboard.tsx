@@ -3,10 +3,19 @@ import { Users, DollarSign, Activity, Search } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
   const rows = [1, 2, 3, 4, 5]; // Placeholders pour les membres
+  const userData = JSON.parse(localStorage.getItem('user') || '{}');
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold text-dark">Tableau de bord</h1>
+      
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-dark">
+          Tableau de bord de <span className="text-primary">{userData.firstName} {userData.lastName}</span>
+        </h1>
+        <span className="bg-primary-light text-primary px-3 py-1 rounded-full text-xs font-bold uppercase">
+          {userData.roles?.includes('ROLE_ADMIN') ? 'Administrateur' : 'Membre Bureau'}
+        </span>
+      </div>
       
       {/* Stats rapides */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

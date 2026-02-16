@@ -1,9 +1,9 @@
-// src/routes/AppRouter.tsx
 import React from 'react';
-import { useRoutes, Navigate } from 'react-router-dom';
+import { useRoutes, Navigate, Outlet } from 'react-router-dom';
 
 // Import des Layouts
 import { PublicLayout, AdminLayout } from '../components/layouts';
+
 // Import des Pages Publiques
 import { 
   HomePage, 
@@ -21,48 +21,94 @@ import {
   AdminTicketing 
 } from '../pages/admin';
 
+// --- COMPOSANT DE PROTECTION (AUTH GUARD) ---
+/**
+ * Ce composant vérifie si l'utilisateur est connecté et s'il a le bon rôle.
+ * @param allowedRoles : Liste des rôles autorisés (ex: ['ROLE_ADMIN'])
+ */
+const AuthGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
+  const userString = localStorage.getItem('user');
+  const user = userString ? JSON.parse(userString) : null;
+
+  // 1. Si l'utilisateur n'est pas connecté -> Direction la page de Login
+  if (!user) {
+    return <Navigate to="/admin" replace />;
+  }
+
+  // 2. Vérification des rôles (Security)
+  // .some vérifie si au moins un des rôles de l'utilisateur est dans la liste autorisée
+  const hasAccess = allowedRoles.some(role => user.roles.includes(role));
+
+  if (!hasAccess) {
+    // Si l'utilisateur est connecté mais n'a pas le droit (ex: ROLE_USER simple)
+    // On le renvoie à l'accueil
+    return <Navigate to="/" replace />;
+  }
+
+  // 3. Si tout est OK, on affiche les pages enfants
+  return <Outlet />;
+};
+
+// --- ARCHITECTURE DES ROUTES ---
 const AppRouter: React.FC = () => {
-  // On définit le tableau des routes
-  const routes = useRoutes([
+  return useRoutes([
     {
-      // SECTION PUBLIQUE
+      // --- ROUTES PUBLIQUES (Ouvertes à tous) ---
       path: '/',
-      element: <PublicLayout />, // Le cadre avec Header/Footer
+      element: <PublicLayout />,
       children: [
-        { index: true, element: <HomePage /> }, // Route par défaut : /
+        { index: true, element: <HomePage /> },
         { path: 'adhesion', element: <MembershipPage /> },
         { path: 'evenements', element: <EventsPage /> },
         { path: 'actualites', element: <NewsPage /> },
         { path: 'contact', element: <ContactPage /> },
+        // On pourra ajouter ici les pages Success/Cancel de HelloAsso plus tard
       ],
     },
     {
-      // SECTION ADMIN
+      // --- ROUTES ADMIN & BUREAU ---
       path: '/admin',
       children: [
-        // Page de login (sans la sidebar d'admin)
+        // Page de connexion (toujours accessible)
         { index: true, element: <AdminLoginPage /> },
-        
-        // Pages de gestion (avec la sidebar d'admin)
+
+        // 1. ZONE BUREAU (Accessible par ROLE_BUREAU et ROLE_ADMIN)
         {
-          element: <AdminLayout />,
+          element: <AuthGuard allowedRoles={['ROLE_BUREAU', 'ROLE_ADMIN']} />,
           children: [
-            { path: 'dashboard', element: <AdminDashboard /> },
-            { path: 'events', element: <AdminEvents /> },
-            { path: 'ticketing', element: <AdminTicketing /> },
+            {
+              element: <AdminLayout />,
+              children: [
+                { path: 'dashboard', element: <AdminDashboard /> },
+                { path: 'events', element: <AdminEvents /> },
+                { path: 'ticketing', element: <AdminTicketing /> },
+              ],
+            },
+          ],
+        },
+
+        // 2. ZONE ADMIN SUPRÊME (Accessible UNIQUEMENT par ROLE_ADMIN)
+        // C'est ici qu'on mettra la gestion des membres et des invitations
+        {
+          element: <AuthGuard allowedRoles={['ROLE_ADMIN']} />,
+          children: [
+            {
+              element: <AdminLayout />,
+              children: [
+                { path: 'invitations', element: <div className="p-8">Page de gestion des invitations (À venir)</div> },
+                { path: 'members-management', element: <div className="p-8">Page de gestion des rôles (À venir)</div> },
+              ],
+            },
           ],
         },
       ],
     },
     {
-      // GESTION DES ERREURS 404
-      // Si aucune route ne correspond, on redirige vers l'accueil
+      // REDIRECTION SI L'URL N'EXISTE PAS
       path: '*',
       element: <Navigate to="/" replace />,
     },
   ]);
-
-  return routes;
 };
 
 export default AppRouter;
