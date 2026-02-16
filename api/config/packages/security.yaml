@@ -1,58 +1,61 @@
 security:
-    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+    # Stratégie de hachage des mots de passe
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
 
-    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+    # Source des utilisateurs (ta table MySQL 'user')
     providers:
-        # used to reload user from session & other features (e.g. switch_user)
         app_user_provider:
             entity:
                 class: App\Entity\User
                 property: email
-        # used to reload user from session & other features (e.g. switch_user)
+
+    # Hiérarchie : L'Admin possède par défaut tous les droits du Bureau
+    role_hierarchy:
+        ROLE_ADMIN: ROLE_USER
 
     firewalls:
         dev:
-            # Ensure dev tools and static assets are always allowed
             pattern: ^/(_profiler|_wdt|assets|build)/
             security: false
-        main:
-            lazy: true
-            provider: app_user_provider
 
-            # Activate different ways to authenticate:
-            # https://symfony.com/doc/current/security.html#the-firewall
-
-            # https://symfony.com/doc/current/security/impersonating_user.html
-            # switch_user: true
-            # 2. CONNEXION JSON (Pour ton React)
+        # 1. PARE-FEU POUR LE LOGIN (Génération du jeton)
+        # On intercepte les requêtes sur /api/login pour créer le JWT
+        login:
+            pattern: ^/api/login
+            stateless: true # Mode pro : le serveur ne stocke aucune session
             json_login:
                 check_path: api_login
                 username_path: email
                 password_path: password
+                # Ces gestionnaires de Lexik renvoient le JSON {"token": "..."} automatiquement
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
 
-            # 3. DÉCONNEXION
-            logout:
-                path: api_logout
+        # 2. PARE-FEU PRINCIPAL (Vérification du jeton)
+        # Toutes les autres requêtes passant par /api seront vérifiées
+        main:
+            pattern: ^/api
+            stateless: true # Indispensable pour le mode JWT
+            jwt: ~ # Active la lecture du jeton "Authorization: Bearer <token>"
 
-    # Note: Only the *first* matching rule is applied
+    # 3. CONTRÔLE D'ACCÈS (Tes règles métier)
     access_control:
+        # La route de login doit être publique pour pouvoir se connecter !
+        - { path: ^/api/login, roles: PUBLIC_ACCESS }
+
         # Seul l'ADMIN peut voir les adhérents HelloAsso et gérer les invitations
         - { path: ^/api/admin/subscribers, roles: ROLE_ADMIN }
         - { path: ^/api/admin/invitations, roles: ROLE_ADMIN }
         
-        # Le BUREAU (ROLE_USER) peut voir le reste de l'admin (Dashboard, événements)
-        # Note : L'Admin y a accès aussi car il hérite de ROLE_USER
+        # Le reste de l'admin est accessible au BUREAU (ROLE_USER) et à l'ADMIN
         - { path: ^/api/admin, roles: ROLE_USER }
 
 when@test:
     security:
         password_hashers:
-            # Password hashers are resource-intensive by design to ensure security.
-            # In tests, it's safe to reduce their cost to improve performance.
             Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
                 algorithm: auto
-                cost: 4 # Lowest possible value for bcrypt
-                time_cost: 3 # Lowest possible value for argon
-                memory_cost: 10 # Lowest possible value for argon
+                cost: 4
+                time_cost: 3
+                memory_cost: 10

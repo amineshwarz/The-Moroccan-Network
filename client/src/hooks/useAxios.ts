@@ -2,17 +2,37 @@
 import axios from 'axios';
 import { useState } from 'react';
 
-// 1. ON CRÉE L'INSTANCE AXIOS ICI (La configuration)
+// 1. CONFIGURATION DE L'INSTANCE
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL, // L'adresse de ton Symfony
-    withCredentials: true,           // OBLIGATOIRE pour la session
+    baseURL: import.meta.env.VITE_API_URL, // http://localhost:5173
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
     }
+    // Note : withCredentials: true n'est plus indispensable avec le JWT, 
+    // mais on peut le laisser si on a d'autres cookies à gérer.
 });
 
-// 2. ON CRÉE LE HOOK
+// 2. L'INTERCEPTEUR (La partie magique)
+// Cette fonction s'exécute AUTOMATIQUEMENT juste avant que la requête ne parte vers Symfony.
+api.interceptors.request.use(
+    (config) => {
+        // On récupère le jeton stocké dans le localStorage
+        const token = localStorage.getItem('jwt_token');
+        
+        // Si le jeton existe, on l'ajoute dans l'en-tête "Authorization"
+        // C'est le format standard : Bearer <votre_jeton>
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
+// 3. LE HOOK
 export const useAxios = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -22,7 +42,6 @@ export const useAxios = () => {
         setError(null);
 
         try {
-            // On utilise "api" qu'on a configuré juste au-dessus
             const response = await api({
                 method,
                 url,
@@ -30,8 +49,8 @@ export const useAxios = () => {
             });
             return response.data;
         } catch (err: any) {
-            // Gestion de l'erreur
-            const message = err.response?.data?.error || "Une erreur est survenue";
+            // Si Symfony renvoie une erreur (ex: 401), on récupère le message
+            const message = err.response?.data?.message || err.response?.data?.error || "Une erreur est survenue";
             setError(message);
             throw err;
         } finally {

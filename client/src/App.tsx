@@ -1,17 +1,15 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
 import AppRouter from './routes/AppRouter';
+import { AuthProvider } from './context/AuthContext'; // Import du provider
 
 const App: React.FC = () => {
   return (
-    <Router>
-      {/* 
-          On appelle simplement AppRouter. 
-          Le hook useRoutes à l'intérieur va détecter l'URL 
-          et afficher le bon composant automatiquement.
-      */}
-      <AppRouter />
-    </Router>
+    <AuthProvider> {/* On entoure le router avec l'AuthProvider */}
+      <Router>
+        <AppRouter />
+      </Router>
+    </AuthProvider>
   );
 };
 

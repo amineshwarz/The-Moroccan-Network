@@ -1,5 +1,7 @@
 import React from 'react';
 import { useRoutes, Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext'; // On importe useAuth
+
 
 // Import des Layouts
 import { PublicLayout, AdminLayout } from '../components/layouts';
@@ -18,7 +20,8 @@ import {
   AdminLoginPage, 
   AdminDashboard, 
   AdminEvents, 
-  AdminTicketing 
+  AdminTicketing,
+  AdminInvitationsPage  
 } from '../pages/admin';
 
 // --- COMPOSANT DE PROTECTION (AUTH GUARD) ---
@@ -27,8 +30,12 @@ import {
  * @param allowedRoles : Liste des rôles autorisés (ex: ['ROLE_ADMIN'])
  */
 const AuthGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
-  const userString = localStorage.getItem('user');
-  const user = userString ? JSON.parse(userString) : null;
+  const { user, loading } = useAuth();
+
+   // On attend que le context ait fini de vérifier le localStorage au démarrage
+   if (loading) {
+    return <div className="h-screen flex items-center justify-center text-primary font-bold">Chargement...</div>;
+  }
 
   // 1. Si l'utilisateur n'est pas connecté -> Direction la page de Login
   if (!user) {
@@ -95,7 +102,7 @@ const AppRouter: React.FC = () => {
             {
               element: <AdminLayout />,
               children: [
-                { path: 'invitations', element: <div className="p-8">Page de gestion des invitations (À venir)</div> },
+                { path: 'invitations', element: <AdminInvitationsPage />},
                 { path: 'members-management', element: <div className="p-8">Page de gestion des rôles (À venir)</div> },
               ],
             },

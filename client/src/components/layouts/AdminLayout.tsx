@@ -9,6 +9,7 @@ export const AdminLayout: React.FC = () => {
     { label: 'Tableau de bord', path: '/admin/dashboard', icon: <LayoutDashboard size={20} /> },
     { label: 'Événements', path: '/admin/events', icon: <Calendar size={20} /> },
     { label: 'Billetterie', path: '/admin/ticketing', icon: <Ticket size={20} /> },
+    { label: 'Invitations', path: '/admin/invitations', icon: <Calendar size={20} /> },
   ];
 
   return (

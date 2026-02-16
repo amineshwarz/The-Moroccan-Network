@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Mail, Loader2 } from 'lucide-react'; // Ajout de Loader2 pour le spinner
 import { useAxios } from '../../../hooks/useAxios'; // Import de ton hook personnalisé
+import { useAuth } from '../../../context/AuthContext'; 
 
 export const AdminLoginPage: React.FC = () => {
   // 1. Définition des états pour les champs du formulaire
@@ -9,6 +10,8 @@ export const AdminLoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   
   const navigate = useNavigate();
+
+  const { login } = useAuth(); // On récupère la fonction login du context pour mettre à jour l'état global après la connexion
 
   // 2. Utilisation de ton hook useAxios
   // request : la fonction pour appeler l'API
@@ -21,23 +24,16 @@ export const AdminLoginPage: React.FC = () => {
     e.preventDefault();
     
     try {
-      // On envoie la requête POST à Symfony
-      // Les données correspondent à ce que ton SecurityController attend
-      const data = await request('POST', '/api/login', {
-        email,
-        password
-      });
-
-      // Si la requête réussit :
-      // On stocke les infos de l'utilisateur (nom, rôles) dans le localStorage
-      // Cela nous servira à personnaliser l'affichage plus tard
-      localStorage.setItem('user', JSON.stringify(data));
-
-      // Redirection vers le tableau de bord
+      // 1. Appel à la route de login JWT
+      const data = await request('POST', '/api/login', { email, password });
+    
+      // 2. On utilise la fonction du context
+      // ATTENTION : 'data.user' doit exister dans la réponse Symfony 
+      // (via le Listener AuthenticationSuccessListener que je t'ai donné avant)
+      login(data.user, data.token);
+    
       navigate('/admin/dashboard');
-      
     } catch (err) {
-      // L'erreur est automatiquement capturée par le hook et affichée dans le composant via {error}
       console.error("Échec de la connexion", err);
     }
   };
