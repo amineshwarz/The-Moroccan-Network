@@ -4,3 +4,4 @@ export * from './News/NewsPage';
 export * from './Events/EventsPage'; 
 export * from './Contact/ContactPage';
 export * from './Register/RegistrationPage';
+export * from './Register/ForgotPasswordPage';

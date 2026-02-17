@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Lock, Mail, Loader2 } from 'lucide-react'; // Ajout de Loader2 pour le spinner
 import { useAxios } from '../../../hooks/useAxios'; // Import de ton hook personnalisé
 import { useAuth } from '../../../context/AuthContext'; 
+import {Link} from "react-router-dom";
 
 export const AdminLoginPage: React.FC = () => {
   // 1. Définition des états pour les champs du formulaire
@@ -86,6 +87,14 @@ export const AdminLoginPage: React.FC = () => {
                 placeholder="••••••••" 
               />
             </div>
+            <div className="flex justify-end">
+  <Link 
+    to="/forgot-password" 
+    className="text-xs font-bold text-primary hover:text-dark transition"
+  >
+    Mot de passe oublié ?
+  </Link>
+</div>
           </div>
 
           <button 

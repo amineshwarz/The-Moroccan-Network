@@ -12,7 +12,8 @@ import {
   EventsPage, 
   NewsPage, 
   ContactPage,
-  RegistrationPage
+  RegistrationPage,
+  ForgotPasswordPage
 } from '../pages/public';
 
 // Import des Pages Admin
@@ -62,6 +63,7 @@ const AppRouter: React.FC = () => {
         { path: 'evenements', element: <EventsPage /> },
         { path: 'actualites', element: <NewsPage /> },
         { path: 'contact', element: <ContactPage /> },
+        { path: 'forgot-password', element: <ForgotPasswordPage /> }
       ],
     },
     {
