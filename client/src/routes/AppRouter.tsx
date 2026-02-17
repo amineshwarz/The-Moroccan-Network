@@ -36,7 +36,7 @@ const AuthGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
   }
 
   if (!user) {
-    return <Navigate to="/admin" replace />;
+    return <Navigate to="/" replace />;
   }
 
   // Vérifie si l'utilisateur possède l'un des rôles autorisés pour cette zone
