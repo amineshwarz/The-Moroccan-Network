@@ -36,7 +36,7 @@ class RegistrationController extends AbstractController
         $user->setEmail($invitation->getEmail()); // On impose l'email de l'invitation
         $user->setFirstName($data['firstName']);
         $user->setLastName($data['lastName']);
-        $user->setRoles(['ROLE_USER']); // Rôle de base, en attente de promotion
+        $user->setRoles(['ROLE_USER']); // Il devient membre du bureau immédiatement
 
         $user->setPassword($hasher->hashPassword($user, $data['password']));
 
