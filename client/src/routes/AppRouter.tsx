@@ -23,7 +23,8 @@ import {
   AdminEvents, 
   AdminTicketing,
   AdminInvitationsPage,  
-  AdminSubscribersPage
+  AdminSubscribersPage,
+  AdminMembersPage,
 } from '../pages/admin';
 
 // --- COMPOSANT DE PROTECTION (AUTH GUARD) ---
@@ -99,7 +100,7 @@ const AppRouter: React.FC = () => {
               children: [
                 { path: 'invitations', element: <AdminInvitationsPage />},
                 { path: 'adherents', element: <AdminSubscribersPage /> }, 
-                { path: 'members-management', element: <div className="p-8">Page de gestion des rôles (À venir)</div> },
+                { path: 'members-management', element: <AdminMembersPage /> },
               ],
             },
           ],
