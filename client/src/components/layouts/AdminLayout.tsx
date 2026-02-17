@@ -38,8 +38,12 @@ export const AdminLayout: React.FC = () => {
       {/* Sidebar (Barre latérale) */}
       <aside className="w-64 bg-dark text-white hidden md:flex flex-col shadow-2xl">
         {/* Logo Section */}
-        <div className="p-6 border-b border-white/10 text-center">
-          <span className="text-xl font-black text-primary tracking-tighter italic">M4L Admin</span>
+        <div className="p-8 border-b border-white/5 flex flex-col items-center">
+          <img src="/logo.png" alt="Logo" className="w-40 h-12 mb-4" />
+          {/* <div className="text-center">
+            <p className="text-xs font-bold text-primary tracking-widest uppercase">The Moroccan</p>
+            <p className="text-lg font-black text-white tracking-tighter">NETWORK</p>
+          </div> */}
         </div>
         
         <nav className="flex-1 p-4 space-y-1">

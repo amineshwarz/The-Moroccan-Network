@@ -19,10 +19,21 @@ export const PublicLayout: React.FC = () => {
       {/* Header */}
       <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-lg">M</div>
-              <span className="text-xl font-bold text-dark">Moroccan 4 Life</span>
+          <div className="flex justify-between items-center h-20">
+             {/* LOGO & NOM DU SITE */}
+             <Link to="/" className="flex items-center space-x-3 group">
+              {/* REMPLACE /logo.png PAR TON VRAI FICHIER */}
+              <img src="/logo.png" alt="Logo" className="w-12 h-12 md:w-40 md:h-20 object-contain" 
+                   onError={(e) => (e.currentTarget.style.display = 'none')} /> 
+              
+              {/* <div className="flex flex-col">
+                <span className="text-xl font-black text-dark leading-none group-hover:text-primary transition-colors">
+                  THE MOROCCAN
+                </span>
+                <span className="text-sm font-bold text-primary tracking-[0.2em]">
+                  NETWORK
+                </span>
+              </div> */}
             </Link>
 
             {/* Desktop Nav */}
@@ -80,7 +91,7 @@ export const PublicLayout: React.FC = () => {
       <footer className="bg-dark text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-             <span className="text-xl font-bold text-primary">Moroccan 4 Life</span>
+             <span className="text-xl font-bold text-primary">THE MOROCCAN NETWORK</span>
              <p className="text-gray-400 text-sm mt-4">Fédérer et partager ensemble.</p>
           </div>
           {/* ... Autres colonnes du footer ... */}
