@@ -12,7 +12,8 @@ import {
   MembershipPage, 
   EventsPage, 
   NewsPage, 
-  ContactPage 
+  ContactPage,
+  RegistrationPage
 } from '../pages/public';
 
 // Import des Pages Admin
@@ -66,6 +67,7 @@ const AppRouter: React.FC = () => {
       children: [
         { index: true, element: <HomePage /> },
         { path: 'adhesion', element: <MembershipPage /> },
+        { path: 'register', element: <RegistrationPage /> }, // <-- AJOUTE CETTE LIGNE
         { path: 'evenements', element: <EventsPage /> },
         { path: 'actualites', element: <NewsPage /> },
         { path: 'contact', element: <ContactPage /> },
