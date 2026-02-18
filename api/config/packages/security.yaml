@@ -12,7 +12,8 @@ security:
 
     # Hiérarchie : L'Admin possède par défaut tous les droits du Bureau
     role_hierarchy:
-        ROLE_ADMIN: ROLE_USER
+        ROLE_SUPER_ADMIN: ROLE_ADMIN # Le Président (Super Admin) a les droits du Bras Droit (Admin) + du Staff
+        ROLE_ADMIN: ROLE_USER # Le Bras Droit (Admin) a les droits du Staff (User)
 
     firewalls:
         dev:
@@ -47,6 +48,7 @@ security:
         # Seul l'ADMIN peut voir les adhérents HelloAsso et gérer les invitations
         - { path: ^/api/admin/subscribers, roles: ROLE_ADMIN }
         - { path: ^/api/admin/invitations, roles: ROLE_ADMIN }
+        - { path: ^/api/admin/users, roles: ROLE_ADMIN } 
         
         # Le reste de l'admin est accessible au BUREAU (ROLE_USER) et à l'ADMIN
         - { path: ^/api/admin, roles: ROLE_USER }

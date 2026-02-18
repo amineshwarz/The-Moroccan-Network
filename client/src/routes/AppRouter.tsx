@@ -35,15 +35,17 @@ const AuthGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
     return <div className="h-screen flex items-center justify-center text-primary font-bold">Chargement...</div>;
   }
 
+  // Redirection vers l'accueil public si non connecté
   if (!user) {
     return <Navigate to="/" replace />;
   }
 
-  // Vérifie si l'utilisateur possède l'un des rôles autorisés pour cette zone
+  // CHANGEMENT ICI : On vérifie si l'utilisateur a au moins UN des rôles autorisés.
+  // On utilise l'optional chaining (?.) pour éviter les erreurs si roles est undefined.
   const hasAccess = user.roles && allowedRoles.some(role => user.roles.includes(role));
 
   if (!hasAccess) {
-    // Si l'utilisateur est connecté mais n'a pas le bon rôle (ex: un membre bureau qui veut aller en zone Admin)
+    // Si connecté mais rôle insuffisant, retour au dashboard
     return <Navigate to="/admin/dashboard" replace />;
   }
 
@@ -54,13 +56,13 @@ const AuthGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
 const AppRouter: React.FC = () => {
   return useRoutes([
     {
-      // --- 1. ROUTES PUBLIQUES (Ouvertes à tout le monde) ---
+      // --- 1. ROUTES PUBLIQUES ---
       path: '/',
       element: <PublicLayout />,
       children: [
         { index: true, element: <HomePage /> },
         { path: 'adhesion', element: <MembershipPage /> },
-        { path: 'register', element: <RegistrationPage /> }, // Accessible via ton lien d'invitation
+        { path: 'register', element: <RegistrationPage /> },
         { path: 'evenements', element: <EventsPage /> },
         { path: 'actualites', element: <NewsPage /> },
         { path: 'contact', element: <ContactPage /> },
@@ -71,13 +73,12 @@ const AppRouter: React.FC = () => {
       // --- 2. ROUTES D'ACCÈS ADMIN/BUREAU ---
       path: '/admin',
       children: [
-        // Page de login (accessible si non connecté)
         { index: true, element: <AdminLoginPage /> },
 
-        // ZONE STAFF / BUREAU (Accessible par ROLE_USER et ROLE_ADMIN)
-        // C'est ici qu'ils arrivent immédiatement après inscription
+        // --- ZONE STAFF / BUREAU ---
+        // CHANGEMENT : On ajoute ROLE_SUPER_ADMIN pour que le Président puisse aussi y accéder
         {
-          element: <AuthGuard allowedRoles={['ROLE_USER', 'ROLE_ADMIN']} />,
+          element: <AuthGuard allowedRoles={['ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN']} />,
           children: [
             {
               element: <AdminLayout />,
@@ -90,10 +91,11 @@ const AppRouter: React.FC = () => {
           ],
         },
 
-        // ZONE SUPER-ADMIN (Accessible UNIQUEMENT par ROLE_ADMIN)
-        // Ni le nouveau staff, ni les intrus ne peuvent voir ces pages
+        // --- ZONE ADMINISTRATION (Sensible) ---
+        // CHANGEMENT : On autorise ROLE_ADMIN (Bras droit) ET ROLE_SUPER_ADMIN (Président)
+        // La restriction entre les deux se fera ensuite directement dans les composants (boutons grisés)
         {
-          element: <AuthGuard allowedRoles={['ROLE_ADMIN']} />,
+          element: <AuthGuard allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN']} />,
           children: [
             {
               element: <AdminLayout />,
@@ -108,7 +110,6 @@ const AppRouter: React.FC = () => {
       ],
     },
     {
-      // FALLBACK : Si l'URL n'existe pas, retour à l'accueil
       path: '*',
       element: <Navigate to="/" replace />,
     },

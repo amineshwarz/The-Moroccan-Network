@@ -35,15 +35,15 @@ class CreateAdminCommand extends Command
         $user = new User();
 
         // 2. On définit l'email (ton identifiant de connexion)
-        $user->setEmail('admin@test.com');
+        $user->setEmail('admin@tmn.com');
 
         // 3. On définit le Prénom et le Nom
-        $user->setFirstName('Amine');
-        $user->setLastName('Admin');
+        $user->setFirstName('Admin');
+        $user->setLastName('TMN');
 
         // 4. ON DÉFINIT LE RÔLE : C'est ici qu'on lui donne tous les pouvoirs
         // Dans Symfony, les rôles doivent toujours commencer par "ROLE_"
-        $user->setRoles(['ROLE_ADMIN']);
+        $user->setRoles(['ROLE_SUPER_ADMIN']);
 
         // 5. ON SÉCURISE LE MOT DE PASSE
         // On ne doit JAMAIS stocker un mot de passe en clair (ex: "123456") dans la base.

@@ -18,7 +18,7 @@ export const AdminLayout: React.FC = () => {
   // 2. On crée l'état pour afficher ou cacher la confirmation
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const isAdmin = user?.roles?.includes('ROLE_ADMIN');
+  const isAdmin = user?.roles?.includes('ROLE_ADMIN') || user?.roles?.includes('ROLE_SUPER_ADMIN');;
 
   const staffLinks = [
     { label: 'Tableau de bord', path: '/admin/dashboard', icon: <LayoutDashboard size={20} /> },
