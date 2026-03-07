@@ -104,7 +104,7 @@ export const AdminEvents: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* HEADER */}
-      <div className="flex justify-between items-center bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100">
+      <div className="flex justify-between items-center bg-white p-6  shadow-sm border border-gray-100">
         <div>
           <h1 className="text-2xl font-bold text-dark italic">Gestion des <span className="text-primary uppercase">Événements</span></h1>
           <p className="text-gray-400 text-sm">Organisez les activités de The Moroccan Network.</p>
@@ -121,10 +121,10 @@ export const AdminEvents: React.FC = () => {
       {/* LISTE DES EVENTS */}
       <div className="grid grid-cols-1 gap-4">
         {events.map((event) => (
-          <div key={event.id} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center justify-between hover:shadow-md transition-all">
+          <div key={event.id} className="bg-white p-6  shadow-sm border border-gray-100 flex items-center justify-between hover:shadow-md transition-all">
             <div className="flex items-center gap-6">
                {/* Affichage de la miniature de l'image si elle existe */}
-               <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
+               <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gray-100 shrink-0 border border-gray-100">
                   {event.image ? (
                       <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
                   ) : (
@@ -159,7 +159,7 @@ export const AdminEvents: React.FC = () => {
       {/* --- MODAL (CREATE / UPDATE) --- */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark/60 backdrop-blur-sm">
-          <div className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] shadow-2xl animate-in zoom-in duration-200">
+          <div className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto  shadow-2xl animate-in zoom-in duration-200">
             
             <form onSubmit={handleSubmit} className="p-8 space-y-6">
               <div className="flex justify-between items-center border-b pb-4">
