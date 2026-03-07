@@ -6,7 +6,7 @@ import { useState } from 'react';
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL, // http://localhost:5173
     headers: {
-        'Content-Type': 'application/json',
+        // 'Content-Type': 'application/json',
         'Accept': 'application/json',
     }
     // Note : withCredentials: true n'est plus indispensable avec le JWT, 

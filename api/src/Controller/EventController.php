@@ -14,66 +14,96 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/api/events')]
 class EventController extends AbstractController
 {
+    /**
+     * Injection du Service EventManager (pour la logique métier)
+     * et du Repository (pour la lecture en base de données)
+     */
     public function __construct(
         private EventManager $eventManager,
         private EventRepository $eventRepository
     ) {}
 
     /**
-     * PUBLIC : Liste des événements publiés
+     * LISTER LES ÉVÉNEMENTS
+     * Accessible par tout le monde (Public) et le Staff (Admin/Bureau)
      */
-    #[Route('/', name: 'event_list', methods: ['GET'])]
+    #[Route('', name: 'event_list', methods: ['GET'])]
     public function list(): JsonResponse
     {
-        // Si c'est un membre du staff, on lui montre tout (même non publiés)
-        // Sinon, on ne montre que les événements publics
+        // LOGIQUE : Si l'utilisateur est membre du staff (ROLE_USER ou plus),
+        // on lui montre tout. Sinon, on filtre uniquement les événements publiés.
         if ($this->isGranted('ROLE_USER')) {
             $events = $this->eventRepository->findAll();
         } else {
             $events = $this->eventRepository->findBy(['isPublished' => true]);
         }
 
+        // On utilise la fonction formatEvent de notre Service pour avoir un JSON propre
         $data = array_map(fn($e) => $this->eventManager->formatEvent($e), $events);
+        
         return $this->json($data);
     }
 
     /**
-     * STAFF : Créer un événement
+     * CRÉER UN ÉVÉNEMENT
+     * Reçoit un FormData contenant les textes et l'image (file)
      */
     #[Route('/create', name: 'event_create', methods: ['POST'])]
-    #[IsGranted('ROLE_USER')] // Seul le staff peut créer
+    #[IsGranted('ROLE_USER')]
     public function create(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-        $event = $this->eventManager->save(new Event(), $data);
+        // On récupère les données textuelles (title, description, etc.)
+        $data = $request->request->all();
+        
+        // On récupère le fichier image s'il existe
+        $imageFile = $request->files->get('image');
 
-        return $this->json([
-            'message' => 'Événement créé avec succès',
-            'event' => $this->eventManager->formatEvent($event)
-        ], 201);
+        try {
+            // On délègue la création et l'upload au Service EventManager
+            $event = $this->eventManager->save(new Event(), $data, $imageFile);
+
+            return $this->json([
+                'message' => 'Événement créé avec succès',
+                'event' => $this->eventManager->formatEvent($event)
+            ], 201);
+        } catch (\Exception $e) {
+            return $this->json(['error' => $e->getMessage()], 400);
+        }
     }
 
     /**
-     * STAFF : Modifier un événement
+     * MODIFIER UN ÉVÉNEMENT
+     * Note : On utilise POST car PHP ne gère pas nativement les fichiers (FormData) 
+     * via les méthodes PUT ou PATCH sans configuration complexe.
      */
-    #[Route('/{id}/update', name: 'event_update', methods: ['PUT', 'PATCH'])]
+    #[Route('/{id}/update', name: 'event_update', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
     public function update(Event $event, Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-        $this->eventManager->save($event, $data);
+        // Récupération des données modifiées
+        $data = $request->request->all();
+        $imageFile = $request->files->get('image');
 
-        return $this->json(['message' => 'Événement mis à jour']);
+        try {
+            // Le service s'occupe de mettre à jour l'entité et de remplacer l'image
+            $this->eventManager->save($event, $data, $imageFile);
+
+            return $this->json(['message' => 'Événement mis à jour avec succès']);
+        } catch (\Exception $e) {
+            return $this->json(['error' => $e->getMessage()], 400);
+        }
     }
 
     /**
-     * STAFF : Supprimer un événement
+     * SUPPRIMER UN ÉVÉNEMENT
      */
     #[Route('/{id}', name: 'event_delete', methods: ['DELETE'])]
     #[IsGranted('ROLE_USER')]
     public function delete(Event $event): JsonResponse
     {
+        // Le service gère la suppression (et le nettoyage des prix orphelins)
         $this->eventManager->delete($event);
-        return $this->json(['message' => 'Événement supprimé']);
+        
+        return $this->json(['message' => 'Événement supprimé avec succès']);
     }
 }
