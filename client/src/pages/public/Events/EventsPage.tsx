@@ -9,7 +9,7 @@ export const EventsPage: React.FC = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       // On appelle l'API publique (qui ne renvoie que les événements isPublished: true)
-      const data = await request('GET', '/api/events/');
+      const data = await request('GET', '/api/events');
       setEvents(data);
     };
     fetchEvents();
