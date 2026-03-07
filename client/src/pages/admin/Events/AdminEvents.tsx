@@ -133,7 +133,7 @@ export const AdminEvents: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* HEADER PAGE */}
-      <div className="flex justify-between items-center bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100">
+      <div className="flex justify-between items-center bg-white p-6 shadow-sm border border-gray-100">
         <div>
           <h1 className="text-2xl font-bold text-dark italic tracking-tighter">
             Gestion des <span className="text-primary uppercase">Événements</span>
@@ -155,7 +155,7 @@ export const AdminEvents: React.FC = () => {
           <div key={event.id} className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100 flex items-center justify-between hover:shadow-md transition-all group">
             <div className="flex items-center gap-6">
                {/* Miniature Image */}
-               <div className="w-20 h-20 rounded-[1.5rem] overflow-hidden bg-gray-50 shrink-0 border border-gray-100 shadow-inner">
+               <div className="w-20 h-20  overflow-hidden bg-gray-50 shrink-0 border border-gray-100 shadow-inner">
                   {event.image ? (
                       <img src={`http://localhost:8000${event.image}`} alt={event.title} className="w-full h-full object-cover" />
                   ) : (
@@ -205,7 +205,7 @@ export const AdminEvents: React.FC = () => {
                 {/* Section Image Upload */}
                 <div className="space-y-4">
                     <label className="text-[11px] font-black uppercase text-gray-400 tracking-widest">Image d'illustration</label>
-                    <div className="relative group cursor-pointer h-48 bg-gray-50 rounded-[2rem] border-2 border-dashed border-gray-200 overflow-hidden flex items-center justify-center hover:border-primary transition-colors">
+                    <div className="relative group cursor-pointer h-48 bg-gray-50  border-2 border-dashed border-gray-200 overflow-hidden flex items-center justify-center hover:border-primary transition-colors">
                         {imagePreview ? (
                             <>
                                 <img src={imagePreview} className="w-full h-full object-cover" alt="Preview" />
@@ -307,7 +307,7 @@ export const AdminEvents: React.FC = () => {
                 <button 
                     type="submit" 
                     disabled={loading}
-                    className="bg-dark text-white px-10 py-5 rounded-[2rem] font-black text-lg hover:bg-primary transition-all shadow-2xl flex items-center justify-center gap-3 disabled:bg-gray-400 group"
+                    className="bg-dark text-white px-10 py-5  font-black text-lg hover:bg-primary transition-all shadow-2xl flex items-center justify-center gap-3 disabled:bg-gray-400 group"
                 >
                     {loading ? <Loader2 className="animate-spin" /> : <Save className="group-hover:scale-110 transition-transform" />}
                     {editingEventId ? 'METTRE À JOUR' : 'CRÉER L\'ÉVÉNEMENT'}
