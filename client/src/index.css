@@ -36,7 +36,7 @@ body {
 
 /* 4. TYPOGRAPHIE PAR DÉFAUT */
 h1, h2, h3, h4 {
-  color: var(--color-dark);
+  /* color: var(--color-dark); */
   font-weight: 700;
   margin-bottom: 1rem;
 }
@@ -54,7 +54,7 @@ a {
 ::-webkit-scrollbar-track {
   background: #f1f1f1;
 }
-::-webkit-scrollbar-thumb {
+/* ::-webkit-scrollbar-thumb {
   background: var(--color-primary);
   border-radius: 10px;
-}
+} */
