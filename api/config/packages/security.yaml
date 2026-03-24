@@ -19,6 +19,12 @@ security:
         dev:
             pattern: ^/(_profiler|_wdt|assets|build)/
             security: false
+            
+        # --- AJOUTE CE BLOC AVANT LE BLOC MAIN ---
+        webhook:
+            pattern: ^/api/webhook/helloasso
+            stateless: true
+            security: false # On désactive la sécurité pour cette route précise, car HelloAsso ne peut pas gérer les jetons JWT. C'est un webhook public qui reçoit des notifications de HelloAsso, donc il doit être accessible sans authentification.
 
         # 1. PARE-FEU POUR LE LOGIN (Génération du jeton)
         # On intercepte les requêtes sur /api/login pour créer le JWT
