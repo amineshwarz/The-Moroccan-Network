@@ -16,6 +16,10 @@ import {
   ForgotPasswordPage
 } from '../pages/public';
 
+// --- NOUVEAUX IMPORTS : STATUS DE PAIEMENT ---
+import { SuccessPage } from '../pages/public/PaymentStatus/SuccessPage';
+import { CancelPage } from '../pages/public/PaymentStatus/CancelPage';
+
 // Import des Pages Admin
 import { 
   AdminLoginPage, 
@@ -31,21 +35,22 @@ import {
 const AuthGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
   const { user, loading } = useAuth();
 
+  // On attend que le context ait fini de charger (lecture du localStorage)
   if (loading) {
-    return <div className="h-screen flex items-center justify-center text-primary font-bold">Chargement...</div>;
+    return <div className="h-screen flex items-center justify-center text-primary font-bold animate-pulse text-2xl uppercase tracking-widest italic">The Moroccan Network...</div>;
   }
 
-  // Redirection vers l'accueil public si non connecté
+  // Redirection vers l'accueil public si l'utilisateur n'est pas connecté
   if (!user) {
     return <Navigate to="/" replace />;
   }
 
-  // CHANGEMENT ICI : On vérifie si l'utilisateur a au moins UN des rôles autorisés.
-  // On utilise l'optional chaining (?.) pour éviter les erreurs si roles est undefined.
-  const hasAccess = user.roles && allowedRoles.some(role => user.roles.includes(role));
+  // Sécurité : On vérifie si l'utilisateur a au moins UN des rôles autorisés.
+  // Utilisation de l'optional chaining (?.) pour éviter les crashs si l'objet user est mal formé.
+  const hasAccess = user?.roles && allowedRoles.some(role => user.roles.includes(role));
 
   if (!hasAccess) {
-    // Si connecté mais rôle insuffisant, retour au dashboard
+    // Si l'utilisateur est connecté mais tente d'accéder à une zone interdite (ex: Staff qui veut aller en zone Admin)
     return <Navigate to="/admin/dashboard" replace />;
   }
 
@@ -56,7 +61,7 @@ const AuthGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
 const AppRouter: React.FC = () => {
   return useRoutes([
     {
-      // --- 1. ROUTES PUBLIQUES ---
+      // --- 1. ROUTES PUBLIQUES (Ouvertes à tous les visiteurs) ---
       path: '/',
       element: <PublicLayout />,
       children: [
@@ -66,17 +71,22 @@ const AppRouter: React.FC = () => {
         { path: 'evenements', element: <EventsPage /> },
         { path: 'actualites', element: <NewsPage /> },
         { path: 'contact', element: <ContactPage /> },
-        { path: 'forgot-password', element: <ForgotPasswordPage /> }
+        { path: 'forgot-password', element: <ForgotPasswordPage /> },
+        
+        // --- ROUTES DE RETOUR HELLOASSO ---
+        // Ces routes doivent correspondre aux URLs envoyées dans ton PaymentController Symfony
+        { path: 'payment/success', element: <SuccessPage /> },
+        { path: 'payment/cancel', element: <CancelPage /> },
       ],
     },
     {
       // --- 2. ROUTES D'ACCÈS ADMIN/BUREAU ---
       path: '/admin',
       children: [
+        // Page de login (toujours accessible pour se connecter)
         { index: true, element: <AdminLoginPage /> },
 
-        // --- ZONE STAFF / BUREAU ---
-        // CHANGEMENT : On ajoute ROLE_SUPER_ADMIN pour que le Président puisse aussi y accéder
+        // --- ZONE STAFF / BUREAU (Rôles : Bureau, Bras Droit, Président) ---
         {
           element: <AuthGuard allowedRoles={['ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN']} />,
           children: [
@@ -91,9 +101,7 @@ const AppRouter: React.FC = () => {
           ],
         },
 
-        // --- ZONE ADMINISTRATION (Sensible) ---
-        // CHANGEMENT : On autorise ROLE_ADMIN (Bras droit) ET ROLE_SUPER_ADMIN (Président)
-        // La restriction entre les deux se fera ensuite directement dans les composants (boutons grisés)
+        // --- ZONE ADMINISTRATION SUPRÊME (Rôles : Bras Droit et Président uniquement) ---
         {
           element: <AuthGuard allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN']} />,
           children: [
@@ -110,6 +118,7 @@ const AppRouter: React.FC = () => {
       ],
     },
     {
+      // FALLBACK : Si l'URL n'est pas reconnue, retour à l'accueil
       path: '*',
       element: <Navigate to="/" replace />,
     },

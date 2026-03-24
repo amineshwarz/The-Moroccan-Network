@@ -44,6 +44,12 @@ class PaymentController extends AbstractController
             'returnUrl' => $baseUrl . '/api/payment/success',
             'errorUrl' => $baseUrl . '/api/payment/error',
             'containsDonation' => false,
+            // --- AJOUT ICI : PRE-REMPLISSAGE HELLOASSO ---
+            'payer' => [
+                'firstName' => $data['firstName'],
+                'lastName' => $data['lastName'],
+                'email' => $data['email'],
+            ],
             'metadata' => [
                 'subscriber_id' => (string) $subscriber->getId() // Crucial pour le Webhook
             ]
@@ -70,6 +76,6 @@ class PaymentController extends AbstractController
     #[Route('/error', name: 'error', methods: ['GET'])]
     public function error(): Response
     {
-        return $this->redirect('http://localhost:5173/payment/error');
+        return $this->redirect('http://localhost:5173/payment/cancel');
     }
 }
