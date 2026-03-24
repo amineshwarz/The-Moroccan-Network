@@ -191,7 +191,7 @@ export const AdminEvents: React.FC = () => {
       {/* --- MODAL DE CRÉATION / MODIFICATION --- */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark/70 backdrop-blur-md">
-          <div className="bg-white w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-[3rem] shadow-2xl animate-in zoom-in duration-300">
+          <div className="bg-white w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in duration-300">
             
             <form onSubmit={handleSubmit} className="p-10 space-y-8">
               <div className="flex justify-between items-center border-b border-gray-100 pb-6">
