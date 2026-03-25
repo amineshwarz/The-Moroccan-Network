@@ -1,52 +1,117 @@
-import React from 'react';
-import { Users, DollarSign, Search } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { useAxios } from '../../../hooks/useAxios';
+import { Users, CheckCircle, Clock, GraduationCap, Search, RefreshCw, Euro } from 'lucide-react';
 
 export const AdminSubscribersPage: React.FC = () => {
-  // Ici on garde tes anciennes lignes de test
-  const rows = [1, 2, 3, 4, 5];
+  const [subscribers, setSubscribers] = useState<any[]>([]);
+  const { request, loading, error } = useAxios();
+
+  const loadAdherents = async () => {
+    try {
+      const data = await request('GET', '/api/admin/subscribers');
+      setSubscribers(data);
+    } catch (err) {
+      console.error("Erreur chargement", err);
+    }
+  };
+
+  useEffect(() => {
+    loadAdherents();
+  }, []);
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-2xl font-bold text-dark">Gestion des <span className="text-primary">Adhérents</span></h1>
-
-      {/* Les stats rapides que tu avais */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl border-l-4 border-primary shadow-sm">
-          <p className="text-gray-500 font-medium text-sm">Total Adhérents HelloAsso</p>
-          <p className="text-3xl font-bold text-dark mt-2">124</p>
+    <div className="space-y-6">
+      {/* HEADER */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-dark italic">
+            Liste des <span className="text-primary uppercase tracking-tighter">Adhérents</span>
+          </h1>
+          <p className="text-gray-400 text-sm">Gestion des adhésions HelloAsso</p>
         </div>
-        {/* ... Autres stats ... */}
+        <button 
+          onClick={loadAdherents}
+          className="p-3 bg-white text-primary rounded-2xl shadow-sm hover:bg-primary hover:text-white transition-all"
+        >
+          <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
+        </button>
       </div>
 
-      {/* Le tableau des membres que tu avais */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-6 border-b border-gray-50 flex justify-between items-center">
-          <h2 className="text-lg font-bold text-dark">Liste des paiements validés</h2>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-            <input type="text" placeholder="Rechercher..." className="pl-9 pr-4 py-1 border rounded-full text-sm outline-none focus:ring-1 focus:ring-primary" />
-          </div>
-        </div>
-        <table className="w-full text-left">
-          <thead className="bg-gray-50 text-gray-500 text-xs uppercase font-bold">
-            <tr>
-              <th className="px-6 py-4">Nom / Email</th>
-              <th className="px-6 py-4">Statut HelloAsso</th>
-              <th className="px-6 py-4">Date de paiement</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {rows.map((i) => (
-              <tr key={i} className="hover:bg-gray-50">
-                <td className="px-6 py-4 font-bold text-dark">Adhérent Test {i}</td>
-                <td className="px-6 py-4">
-                  <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-[10px] font-bold uppercase">Active</span>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-500">14/02/2024</td>
+      {/* TABLEAU */}
+      <div className="bg-white rounded-[2.5rem] shadow-xl border border-gray-100 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-dark text-white text-xs uppercase font-bold tracking-widest">
+              <tr>
+                <th className="px-6 py-5">Adhérent</th>
+                <th className="px-6 py-5">Formule</th>
+                <th className="px-6 py-5">Statut</th>
+                <th className="px-6 py-5 text-right">Montant</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {subscribers.length === 0 && !loading && (
+                <tr>
+                  <td colSpan={4} className="p-20 text-center text-gray-400 font-medium">
+                    Aucun adhérent trouvé pour le moment.
+                  </td>
+                </tr>
+              )}
+
+              {subscribers.map((s) => (
+                <tr key={s.id} className="hover:bg-gray-50 transition-colors group">
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col">
+                      <span className="font-bold text-dark text-lg capitalize">{s.firstName} {s.lastName}</span>
+                      <span className="text-xs text-gray-400">{s.email}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      {s.type === 'STUDENT' ? (
+                        <span className="flex items-center gap-1.5 bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[10px] font-black uppercase">
+                          <GraduationCap size={14} /> Étudiant
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1.5 bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-[10px] font-black uppercase">
+                          <Users size={14} /> Standard
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    {s.status === 'ACTIVE' ? (
+                      <span className="inline-flex items-center gap-1.5 text-green-600 font-bold text-xs">
+                        <CheckCircle size={16} /> PAIEMENT VALIDÉ
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 text-primary font-bold text-xs animate-pulse">
+                        <Clock size={16} /> EN ATTENTE
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 text-right font-black text-dark">
+                    {s.amount} €
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* STATS RAPIDES (Bas de page) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-primary-light/30 p-6 rounded-[2rem] border border-primary/10">
+              <p className="text-primary font-bold text-xs uppercase tracking-widest mb-1">Total Récolté</p>
+              <p className="text-2xl font-black text-dark">
+                {subscribers.filter(s => s.status === 'ACTIVE').reduce((acc, curr) => acc + curr.amount, 0)} €
+              </p>
+          </div>
+          <div className="bg-dark p-6 rounded-[2rem] text-white">
+              <p className="text-primary font-bold text-xs uppercase tracking-widest mb-1">Nombre d'adhérents</p>
+              <p className="text-2xl font-black">{subscribers.filter(s => s.status === 'ACTIVE').length}</p>
+          </div>
       </div>
     </div>
   );
