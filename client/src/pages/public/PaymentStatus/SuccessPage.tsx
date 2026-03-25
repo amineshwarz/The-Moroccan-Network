@@ -1,44 +1,46 @@
 // src/pages/public/PaymentStatus/SuccessPage.tsx
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { CheckCircle, Home, Calendar } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom'; // Ajoute useSearchParams
+import { CheckCircle, Home, Calendar, Heart } from 'lucide-react';
 
 export const SuccessPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  
+  // On récupère le type depuis l'URL
+  const type = searchParams.get('type');
+
+  // Configuration du contenu selon le type
+  const isMembership = type === 'membership';
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4">
-      <div className="bg-white p-10 md:p-16 rounded-[3rem] shadow-2xl max-w-lg w-full text-center border-t-8 border-green-500 animate-in fade-in zoom-in duration-500">
+      <div className="bg-white p-10 md:p-16 rounded-[3rem] shadow-2xl max-w-lg w-full text-center border-t-8 border-green-500">
         
-        {/* Icône de succès animée */}
-        <div className="w-24 h-24 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
-          <CheckCircle size={50} strokeWidth={2.5} />
+        {/* Icône dynamique */}
+        <div className="w-24 h-24 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-8">
+          {isMembership ? <Heart size={50} /> : <Calendar size={50} />}
         </div>
 
+        {/* Titre dynamique */}
         <h1 className="text-3xl font-black text-dark mb-4 uppercase tracking-tighter italic">
-          Bienvenue dans le <span className="text-primary">Réseau</span> !
+          {isMembership ? "Bienvenue Membre !" : "Place Réservée !"}
         </h1>
         
+        {/* Message dynamique */}
         <p className="text-gray-500 font-medium leading-relaxed mb-10">
-          Votre adhésion à <strong>The Moroccan Network</strong> a été validée avec succès. 
-          Un email de confirmation vous a été envoyé par HelloAsso.
+          {isMembership 
+            ? "Votre adhésion à The Moroccan Network a été validée. Vous faites officiellement partie de l'aventure !"
+            : "Votre billet pour l'événement a bien été enregistré. Préparez-vous pour un moment inoubliable !"}
         </p>
 
         <div className="flex flex-col gap-3">
           <button 
             onClick={() => navigate('/')}
-            className="w-full py-4 bg-dark text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-primary transition-all shadow-lg"
+            className="w-full py-4 bg-dark text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-primary transition-all"
           >
             <Home size={18} />
             Retour à l'accueil
-          </button>
-          
-          <button 
-            onClick={() => navigate('/evenements')}
-            className="w-full py-4 bg-gray-50 text-gray-500 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-gray-100 transition-all"
-          >
-            <Calendar size={18} />
-            Découvrir nos événements
           </button>
         </div>
       </div>

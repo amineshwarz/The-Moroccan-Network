@@ -84,7 +84,7 @@ export const MembershipPage: React.FC = () => {
 
                 <button 
                   onClick={() => setSelectedPlan(plan)}
-                  className="w-full py-5 bg-dark text-white rounded-[1.5rem] font-bold hover:bg-primary transition-all shadow-lg active:scale-95"
+                  className="w-full py-5 bg-dark text-white font-bold hover:bg-primary transition-all shadow-lg active:scale-95"
                 >
                   Sélectionner
                 </button>

@@ -102,13 +102,13 @@ export const AdminSubscribersPage: React.FC = () => {
 
       {/* STATS RAPIDES (Bas de page) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-primary-light/30 p-6 rounded-[2rem] border border-primary/10">
+          <div className="bg-primary-light/30 p-6  border border-primary/10">
               <p className="text-primary font-bold text-xs uppercase tracking-widest mb-1">Total Récolté</p>
               <p className="text-2xl font-black text-dark">
                 {subscribers.filter(s => s.status === 'ACTIVE').reduce((acc, curr) => acc + curr.amount, 0)} €
               </p>
           </div>
-          <div className="bg-dark p-6 rounded-[2rem] text-white">
+          <div className="bg-dark p-6  text-white">
               <p className="text-primary font-bold text-xs uppercase tracking-widest mb-1">Nombre d'adhérents</p>
               <p className="text-2xl font-black">{subscribers.filter(s => s.status === 'ACTIVE').length}</p>
           </div>
