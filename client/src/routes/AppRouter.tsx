@@ -24,7 +24,8 @@ import { CancelPage } from '../pages/public/PaymentStatus/CancelPage';
 import { 
   AdminLoginPage, 
   AdminDashboard, 
-  AdminEvents, 
+  AdminEvents,
+  AdminEventDetailsPage, 
   AdminTicketing,
   AdminInvitationsPage,  
   AdminSubscribersPage,
@@ -96,6 +97,7 @@ const AppRouter: React.FC = () => {
                 { path: 'dashboard', element: <AdminDashboard /> },
                 { path: 'events', element: <AdminEvents /> },
                 { path: 'ticketing', element: <AdminTicketing /> },
+                { path: 'events/:id/tickets', element: <AdminEventDetailsPage /> }
               ],
             },
           ],
