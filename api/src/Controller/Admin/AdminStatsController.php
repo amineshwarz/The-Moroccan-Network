@@ -8,8 +8,10 @@ use App\Repository\EventRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/admin/stats')]
+#[IsGranted('ROLE_ADMIN')]
 class AdminStatsController extends AbstractController
 {
     #[Route('', name: 'admin_stats_index', methods: ['GET'])]
@@ -18,36 +20,38 @@ class AdminStatsController extends AbstractController
         TicketRepository $ticketRepo,
         EventRepository $eventRepo
     ): JsonResponse {
-        
-        // --- 1. CALCUL DES REVENUS (Identique) ---
-        $caAdherents = $subRepo->createQueryBuilder('s')
+        $now = new \DateTimeImmutable();
+        $firstDayMonth = $now->modify('first day of this month')->setTime(0, 0);
+        $firstDayLastMonth = $now->modify('first day of last month')->setTime(0, 0);
+
+        // --- 1. CALCULS CHIFFRE D'AFFAIRES (CA) ---
+        $caAdherents = (float)$subRepo->createQueryBuilder('s')
             ->select('SUM(s.amount)')
             ->where('s.status = :status')->setParameter('status', 'ACTIVE')
             ->getQuery()->getSingleScalarResult() / 100;
 
-        $caBillets = $ticketRepo->createQueryBuilder('t')
+        $caBillets = (float)$ticketRepo->createQueryBuilder('t')
             ->select('SUM(t.amount)')
             ->where('t.status = :status')->setParameter('status', 'ACTIVE')
             ->getQuery()->getSingleScalarResult() / 100;
 
-        // --- 2. LOGIQUE DU PROCHAIN ÉVÉNEMENT (Améliorée) ---
-        $now = new \DateTimeImmutable();
-        
+        // --- 2. CALCUL CROISSANCE (Mois en cours vs Mois dernier) ---
+        // On compte les nouveaux inscrits ce mois-ci
+        $newSubsThisMonth = count($subRepo->createQueryBuilder('s')
+            ->where('s.status = :status')->setParameter('status', 'ACTIVE')
+            // ->andWhere('s.createdAt >= :start')->setParameter('start', $firstDayMonth) 
+            ->getQuery()->getResult());
+
+        // --- 3. PROCHAIN ÉVÉNEMENT ---
         $nextEvent = $eventRepo->createQueryBuilder('e')
-            ->where('e.date >= :now')      // On prend un événement futur
-            ->andWhere('e.isPublished = :pub') // Il doit être publié
-            ->setParameter('now', $now)
-            ->setParameter('pub', true)
-            ->orderBy('e.date', 'ASC')     // Le plus proche de nous
-            ->setMaxResults(1)             // Un seul
+            ->where('e.date >= :now')->setParameter('now', $now)
+            ->andWhere('e.isPublished = :pub')->setParameter('pub', true)
+            ->orderBy('e.date', 'ASC')
+            ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
 
-        $sold = 0;
-        if ($nextEvent) {
-            // On compte les tickets ACTIVE pour cet event précis
-            $sold = count($ticketRepo->findBy(['event' => $nextEvent, 'status' => 'ACTIVE']));
-        }
+        $sold = $nextEvent ? count($ticketRepo->findBy(['event' => $nextEvent, 'status' => 'ACTIVE'])) : 0;
 
         return $this->json([
             'totals' => [
@@ -56,14 +60,14 @@ class AdminStatsController extends AbstractController
                 'ticketing' => $caBillets,
             ],
             'growth' => [
-                'membership' => 12, // Exemples en dur pour l'instant
-                'ticketing' => 25,
+                'membership' => 12.5, // À lier à une vraie logique de calcul historique
+                'ticketing' => 8.2,
             ],
             'activeMembers' => count($subRepo->findBy(['status' => 'ACTIVE'])),
             'totalTickets' => count($ticketRepo->findBy(['status' => 'ACTIVE'])),
             'eventHealth' => [
-                // Si pas d'event, on renvoie null pour que React affiche le message par défaut
-                'title' => $nextEvent ? $nextEvent->getTitle() : null, 
+                'id' => $nextEvent ? $nextEvent->getId() : null,
+                'title' => $nextEvent ? $nextEvent->getTitle() : null,
                 'sold' => $sold,
                 'capacity' => $nextEvent ? $nextEvent->getCapacity() : 0,
             ]
