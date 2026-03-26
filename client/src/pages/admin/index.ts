@@ -6,3 +6,4 @@ export * from './News/AdminNews';
 export * from './Invitation/AdminInvitationsPage';
 export * from './Subscribers/AdminSubscribersPage';
 export * from './Members/AdminMembersPage';
+export * from './Ticketing/AdminTicketing';
