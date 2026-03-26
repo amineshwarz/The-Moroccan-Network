@@ -63,4 +63,21 @@ class ArticleController extends AbstractController
         $em->flush();
         return $this->json(['message' => 'Article supprimé']);
     }
+
+    /**
+     * Voir le détail d'un article via son SLUG
+     */
+    #[Route('/post/{slug}', name: 'news_show', methods: ['GET'])]
+    public function show(string $slug, ArticleRepository $articleRepo, ArticleManager $manager): JsonResponse
+    {
+        // On cherche l'article par son slug
+        $article = $articleRepo->findOneBy(['slug' => $slug]);
+
+        // Si l'article n'existe pas ou n'est pas publié (et qu'on n'est pas admin)
+        if (!$article || (!$article->isPublished() && !$this->isGranted('ROLE_USER'))) {
+            return $this->json(['error' => 'Article introuvable'], 404);
+        }
+
+        return $this->json($manager->formatArticle($article));
+    }
 }

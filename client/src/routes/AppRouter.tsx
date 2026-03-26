@@ -10,10 +10,11 @@ import {
   HomePage, 
   MembershipPage, 
   EventsPage, 
-  NewsPage, 
+  NewsPage,
+  NewsDetailPage, 
   ContactPage,
   RegistrationPage,
-  ForgotPasswordPage
+  ForgotPasswordPage,
 } from '../pages/public';
 
 // --- NOUVEAUX IMPORTS : STATUS DE PAIEMENT ---
@@ -71,6 +72,7 @@ const AppRouter: React.FC = () => {
         { path: 'register', element: <RegistrationPage /> },
         { path: 'evenements', element: <EventsPage /> },
         { path: 'actualites', element: <NewsPage /> },
+        { path: 'actualites/:slug', element: <NewsDetailPage /> },
         { path: 'contact', element: <ContactPage /> },
         { path: 'forgot-password', element: <ForgotPasswordPage /> },
         
