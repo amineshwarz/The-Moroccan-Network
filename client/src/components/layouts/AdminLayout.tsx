@@ -3,7 +3,7 @@ import { Link, useLocation, Outlet } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Calendar, 
-  Ticket, 
+  Newspaper, 
   LogOut, 
   Users, 
   Mail, 
@@ -23,7 +23,7 @@ export const AdminLayout: React.FC = () => {
   const staffLinks = [
     { label: 'Tableau de bord', path: '/admin/dashboard', icon: <LayoutDashboard size={20} /> },
     { label: 'Événements', path: '/admin/events', icon: <Calendar size={20} /> },
-    { label: 'Billetterie', path: '/admin/ticketing', icon: <Ticket size={20} /> },
+    { label: 'Actualités', path: '/admin/news', icon: <Newspaper size={20} /> },
   ];
 
   const adminOnlyLinks = [
