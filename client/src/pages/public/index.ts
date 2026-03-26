@@ -1,4 +1,5 @@
 export * from './Home/HomePage';
+export * from './About/AboutPage';
 export * from './Membership/MembershipPage';
 export * from './News/NewsPage'; 
 export * from './News/NewsDetailPage';

@@ -15,6 +15,7 @@ import {
   ContactPage,
   RegistrationPage,
   ForgotPasswordPage,
+  AboutPage,
 } from '../pages/public';
 
 // --- NOUVEAUX IMPORTS : STATUS DE PAIEMENT ---
@@ -69,6 +70,7 @@ const AppRouter: React.FC = () => {
       element: <PublicLayout />,
       children: [
         { index: true, element: <HomePage /> },
+        { path: 'apropos', element: <AboutPage/> },
         { path: 'adhesion', element: <MembershipPage /> },
         { path: 'register', element: <RegistrationPage /> },
         { path: 'evenements', element: <EventsPage /> },

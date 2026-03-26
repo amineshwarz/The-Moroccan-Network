@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
-import { Menu, X, Home, Calendar, Mail, Newspaper, HeartHandshake } from 'lucide-react';
+import { Menu, X, Home, Calendar, Mail, Newspaper, HeartHandshake, Network } from 'lucide-react';
 
 export const PublicLayout: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -8,6 +8,7 @@ export const PublicLayout: React.FC = () => {
 
   const navLinks = [
     { label: 'Accueil', path: '/', icon: <Home size={18} /> },
+    { label: 'A propos de nous', path: '/apropos', icon: <Network size={18} /> },
     { label: 'Adhérer', path: '/adhesion', icon: <HeartHandshake size={18} /> },
     { label: 'Événements', path: '/evenements', icon: <Calendar size={18} /> },
     { label: 'Actualités', path: '/actualites', icon: <Newspaper size={18} /> },
