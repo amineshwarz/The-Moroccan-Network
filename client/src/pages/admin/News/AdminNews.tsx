@@ -3,7 +3,8 @@ import { useAxios } from '../../../hooks/useAxios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, Newspaper, Edit3, Trash2, Save, X, Upload, 
-  Eye, EyeOff, Loader2, Calendar, ChevronRight, AlertCircle
+  Eye, EyeOff, Loader2, Calendar, ChevronRight, AlertCircle,
+  LayoutGrid, List // Nouvelles icônes pour le toggle
 } from 'lucide-react';
 
 interface Article {
@@ -21,6 +22,9 @@ export const AdminNews: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingArticleId, setEditingArticleId] = useState<number | null>(null);
   
+  // --- NOUVEL ÉTAT : MODE D'AFFICHAGE ---
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
   // États du formulaire
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -57,10 +61,9 @@ export const AdminNews: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer cet article définitivement ?")) {
+    if (window.confirm("Supprimer cet article définitivement ?")) {
       try {
         await request('DELETE', `/api/news/${id}`);
-        // Mise à jour locale immédiate (Optimistic UI)
         setArticles(prev => prev.filter(art => art.id !== id));
       } catch (err) {
         alert("Erreur lors de la suppression");
@@ -94,7 +97,7 @@ export const AdminNews: React.FC = () => {
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-10 pb-20">
       
-      {/* --- HEADER --- */}
+      {/* --- HEADER AVEC TOGGLE --- */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-dark/5 pb-10">
         <div>
           <h1 className="text-6xl font-black text-dark tracking-tighter uppercase italic">
@@ -104,81 +107,132 @@ export const AdminNews: React.FC = () => {
             <Newspaper size={14} className="text-primary"/> Gestion du contenu éditorial
           </p>
         </div>
-        <motion.button 
-          whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-          onClick={() => { resetForm(); setIsModalOpen(true); }}
-          className="bg-dark text-white px-8 py-4  font-black shadow-2xl flex items-center gap-3 hover:bg-primary transition-all uppercase tracking-tighter"
-        >
-          <Plus size={22} /> Rédiger une news
-        </motion.button>
+
+        <div className="flex items-center gap-4 w-full md:w-auto">
+          {/* BOUTONS DE BASCULE (SWITCH GRID/LIST) */}
+          <div className="bg-gray-100 p-1 rounded-2xl flex items-center shadow-inner border border-dark/5">
+            <button 
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded-xl transition-all duration-300 ${viewMode === 'grid' ? 'bg-white text-primary shadow-md' : 'text-gray-400 hover:text-dark'}`}
+              title="Vue Grille"
+            >
+              <LayoutGrid size={20} />
+            </button>
+            <button 
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-xl transition-all duration-300 ${viewMode === 'list' ? 'bg-white text-primary shadow-md' : 'text-gray-400 hover:text-dark'}`}
+              title="Vue Liste"
+            >
+              <List size={20} />
+            </button>
+          </div>
+
+          <motion.button 
+            whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+            onClick={() => { resetForm(); setIsModalOpen(true); }}
+            className="flex-1 md:flex-none bg-dark text-white px-8 py-4  font-black shadow-2xl flex items-center justify-center gap-3 hover:bg-primary transition-all uppercase tracking-tighter"
+          >
+            <Plus size={22} /> Rédiger
+          </motion.button>
+        </div>
       </div>
 
-      {/* --- ARTICLES GRID --- */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+      {/* --- ARTICLES GRID / LIST --- */}
+      <motion.div 
+        layout // Framer Motion anime automatiquement le changement de colonnes
+        className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}
+      >
         <AnimatePresence mode='popLayout'>
           {articles.map((art) => (
             <motion.div 
-              layout
+              layout // Anime le déplacement des cartes
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
+              exit={{ opacity: 0, scale: 0.8 }}
               key={art.id} 
-              className="bg-white rounded-[2.5rem] border border-gray-100 flex flex-col overflow-hidden group hover:shadow-2xl transition-all duration-500"
+              // Style dynamique selon viewMode
+              className={`bg-white border border-gray-100 overflow-hidden group transition-all duration-500 shadow-sm ${
+                viewMode === 'grid' 
+                ? 'rounded-[2.5rem] flex flex-col hover:shadow-2xl' 
+                : 'rounded-3xl flex flex-row items-center p-4 hover:shadow-lg'
+              }`}
             >
-              {/* Image Container */}
-              <div className="h-64 relative overflow-hidden bg-gray-50">
+              {/* IMAGE CONTAINER */}
+              <div className={`relative overflow-hidden bg-gray-50 shrink-0 ${
+                viewMode === 'grid' ? 'h-64 w-full' : 'h-24 w-24 md:h-32 md:w-32 rounded-2xl'
+              }`}>
                 {art.image ? (
                   <img src={`http://localhost:8000${art.image}`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-200"><Newspaper size={64} /></div>
+                  <div className="w-full h-full flex items-center justify-center text-gray-200">
+                    <Newspaper size={viewMode === 'grid' ? 64 : 32} />
+                  </div>
                 )}
                 
-                {/* Status Badge Over Image */}
-                <div className="absolute top-5 left-5">
-                  <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest backdrop-blur-md border ${
-                    art.isPublished ? 'bg-green-500/20 text-green-600 border-green-500/30' : 'bg-orange-500/20 text-orange-600 border-orange-500/30'
-                  }`}>
-                    {art.isPublished ? '• Live' : '• Brouillon'}
-                  </span>
-                </div>
-
-                {/* Quick Action Overlay (Delete only) */}
-                <button 
-                  onClick={() => handleDelete(art.id)}
-                  className="absolute top-5 right-5 p-3 bg-white/90 backdrop-blur-md rounded-2xl text-gray-400 hover:text-primary opacity-0 group-hover:opacity-100 transition-all shadow-xl"
-                >
-                  <Trash2 size={18} />
-                </button>
+                {/* Badge Status (Seulement en vue Grille) */}
+                {viewMode === 'grid' && (
+                  <div className="absolute top-5 left-5">
+                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest backdrop-blur-md border ${
+                      art.isPublished ? 'bg-green-500/20 text-green-600 border-green-500/30' : 'bg-orange-500/20 text-orange-600 border-orange-500/30'
+                    }`}>
+                      {art.isPublished ? '• Live' : '• Brouillon'}
+                    </span>
+                  </div>
+                )}
               </div>
 
-              {/* Content Area */}
-              <div className="p-8 flex flex-col flex-1">
-                <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">
-                  <Calendar size={12} className="text-primary"/> {art.createdAt}
+              {/* CONTENT AREA */}
+              <div className={`flex flex-col flex-1 ${viewMode === 'grid' ? 'p-8' : 'px-6 py-2'}`}>
+                {viewMode === 'grid' && (
+                  <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">
+                    <Calendar size={12} className="text-primary"/> {art.createdAt}
+                  </div>
+                )}
+                
+                <div className="flex justify-between items-start gap-4">
+                  <h3 className={`font-black text-dark leading-tight uppercase tracking-tighter group-hover:text-primary transition-colors ${
+                    viewMode === 'grid' ? 'text-2xl mb-4 italic line-clamp-2' : 'text-lg line-clamp-1'
+                  }`}>
+                    {art.title}
+                  </h3>
+                  {viewMode === 'list' && (
+                    <span className={`hidden sm:block px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border ${
+                      art.isPublished ? 'bg-green-50 text-green-600 border-green-100' : 'bg-orange-50 text-orange-600 border-orange-100'
+                    }`}>
+                      {art.isPublished ? 'Live' : 'Brouillon'}
+                    </span>
+                  )}
                 </div>
                 
-                <h3 className="text-2xl font-black text-dark leading-tight mb-4 line-clamp-2 italic group-hover:text-primary transition-colors uppercase tracking-tighter">
-                  {art.title}
-                </h3>
-                
-                <p className="text-gray-500 text-sm leading-relaxed line-clamp-3 mb-8 flex-1">
-                  {art.content}
-                </p>
+                {/* On cache la description en mode liste pour la clarté */}
+                {viewMode === 'grid' && (
+                  <p className="text-gray-500 text-sm leading-relaxed line-clamp-3 mb-8 flex-1">
+                    {art.content}
+                  </p>
+                )}
 
-                <div className="pt-6 border-t border-gray-50 flex justify-between items-center">
+                <div className={`flex justify-between items-center ${viewMode === 'grid' ? 'pt-6 border-t border-gray-50' : ''}`}>
                   <button 
                     onClick={() => handleEdit(art)}
-                    className="flex items-center gap-2 text-dark font-black text-xs uppercase tracking-widest hover:text-primary transition-colors"
+                    className="flex items-center gap-2 text-dark font-black text-[10px] uppercase tracking-widest hover:text-primary transition-colors"
                   >
-                    Modifier <ChevronRight size={14}/>
+                    {viewMode === 'grid' ? 'Modifier l\'article' : 'Modifier'} <ChevronRight size={14}/>
+                  </button>
+                  
+                  <button 
+                    onClick={() => handleDelete(art.id)}
+                    className="p-2 text-gray-300 hover:text-primary transition-all hover:bg-red-50 rounded-xl"
+                  >
+                    <Trash2 size={18} />
                   </button>
                 </div>
               </div>
             </motion.div>
           ))}
         </AnimatePresence>
-      </div>
+      </motion.div>
 
+      {/* --- EMPTY STATE --- */}
       {articles.length === 0 && !loading && (
         <div className="py-20 text-center bg-gray-50 rounded-[3rem] border-2 border-dashed border-dark/5">
           <AlertCircle className="mx-auto text-gray-300 mb-4" size={48} />
@@ -197,22 +251,19 @@ export const AdminNews: React.FC = () => {
               className="relative bg-white/90 backdrop-blur-xl w-full max-w-4xl rounded-[3rem] shadow-2xl overflow-hidden border border-white"
             >
               <form onSubmit={handleSubmit} className="flex flex-col h-[90vh]">
-                {/* Header Modal Fixed */}
                 <div className="p-8 border-b border-dark/5 flex justify-between items-center bg-white/50">
                     <h2 className="text-2xl font-black text-dark uppercase italic tracking-tighter">Édition de l'actualité</h2>
                     <button type="button" onClick={() => setIsModalOpen(false)} className="p-2 bg-dark/5 rounded-full text-gray-400 hover:text-primary transition-colors"><X /></button>
                 </div>
 
-                {/* Scrollable Content */}
                 <div className="p-10 space-y-8 overflow-y-auto flex-1">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                    {/* Upload de l'image (1/3) */}
                     <div className="md:col-span-1 space-y-4">
                       <label className="text-[11px] font-black uppercase text-gray-400 tracking-widest ml-2">Image de couverture</label>
-                      <div className="relative group h-64 bg-dark/5  border-2 border-dashed border-dark/10 overflow-hidden flex items-center justify-center hover:border-primary transition-all">
+                      <div className="relative group h-64 bg-dark/5 border-2 border-dashed border-dark/10 overflow-hidden flex items-center justify-center hover:border-primary transition-all">
                         {imagePreview ? (
                           <>
-                            <img src={imagePreview} className="w-full h-full object-cover" />
+                            <img src={imagePreview} className="w-full h-full object-cover" alt="" />
                             <div className="absolute inset-0 bg-dark/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold"><Upload size={20}/></div>
                           </>
                         ) : (
@@ -222,7 +273,6 @@ export const AdminNews: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Textes (2/3) */}
                     <div className="md:col-span-2 space-y-6">
                       <div className="space-y-2">
                         <label className="text-[11px] font-black uppercase text-gray-400 tracking-widest ml-2">Titre accrocheur</label>
@@ -242,7 +292,6 @@ export const AdminNews: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Footer Modal Fixed */}
                 <div className="p-8 border-t border-dark/5 bg-white/50 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <input type="checkbox" checked={isPublished} onChange={e => setIsPublished(e.target.checked)} className="w-6 h-6 accent-primary rounded-xl" />
