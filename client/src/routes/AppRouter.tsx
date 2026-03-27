@@ -9,7 +9,8 @@ import { PublicLayout, AdminLayout } from '../components/layouts';
 import { 
   HomePage, 
   MembershipPage, 
-  EventsPage, 
+  EventsPage,
+  EventDetailPage, 
   NewsPage,
   NewsDetailPage, 
   ContactPage,
@@ -74,6 +75,7 @@ const AppRouter: React.FC = () => {
         { path: 'adhesion', element: <MembershipPage /> },
         { path: 'register', element: <RegistrationPage /> },
         { path: 'evenements', element: <EventsPage /> },
+        { path: 'evenements/:id', element: <EventDetailPage /> },
         { path: 'actualites', element: <NewsPage /> },
         { path: 'actualites/:slug', element: <NewsDetailPage /> },
         { path: 'contact', element: <ContactPage /> },

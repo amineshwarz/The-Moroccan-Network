@@ -1,38 +1,22 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Lock, Mail, Loader2 } from 'lucide-react'; // Ajout de Loader2 pour le spinner
-import { useAxios } from '../../../hooks/useAxios'; // Import de ton hook personnalisé
+import { useNavigate, Link } from 'react-router-dom';
+import { Lock, Mail, Loader2, ChevronLeft, ArrowRight } from 'lucide-react';
+import { useAxios } from '../../../hooks/useAxios';
 import { useAuth } from '../../../context/AuthContext'; 
-import {Link} from "react-router-dom";
+import { motion } from 'framer-motion';
 
 export const AdminLoginPage: React.FC = () => {
-  // 1. Définition des états pour les champs du formulaire
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
   const navigate = useNavigate();
-
-  const { login } = useAuth(); // On récupère la fonction login du context pour mettre à jour l'état global après la connexion
-
-  // 2. Utilisation de ton hook useAxios
-  // request : la fonction pour appeler l'API
-  // loading : devient vrai pendant l'appel
-  // error   : contient le message d'erreur si Symfony renvoie une erreur
+  const { login } = useAuth();
   const { request, loading, error } = useAxios();
 
-  // 3. Logique de soumission du formulaire
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     try {
-      // 1. Appel à la route de login JWT
       const data = await request('POST', '/api/login', { email, password });
-    
-      // 2. On utilise la fonction du context
-      // ATTENTION : 'data.user' doit exister dans la réponse Symfony 
-      // (via le Listener AuthenticationSuccessListener que je t'ai donné avant)
       login(data.user, data.token);
-    
       navigate('/admin/dashboard');
     } catch (err) {
       console.error("Échec de la connexion", err);
@@ -40,79 +24,133 @@ export const AdminLoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-light flex items-center justify-center p-4">
-      <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md border-b-8 border-primary">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-dark rounded-xl flex items-center justify-center text-primary font-bold text-3xl mx-auto mb-4 shadow-lg">M</div>
-          <h1 className="text-2xl font-bold text-dark">Administration</h1>
-          <p className="text-gray-500">Accès réservé au bureau</p>
+    <div className="flex min-h-screen bg-white">
+      
+      {/* --- PARTIE GAUCHE : VISUELLE & INSTITUTIONNELLE --- */}
+      <div className="hidden lg:flex w-1/2 bg-dark relative flex-col justify-between p-16 overflow-hidden">
+        {/* Décoration géométrique subtile */}
+        <div className="absolute top-0 right-0 w-full h-full opacity-10 pointer-events-none">
+          <div className="absolute top-[-10%] right-[-10%] w-500px h-500px border border-primary rotate-45" />
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-6">
-          
-          {/* 4. Affichage de l'erreur si Symfony renvoie une 401 ou 403 */}
-          {error && (
-            <div className="bg-red-50 border-l-4 border-primary text-primary p-3 rounded text-sm font-medium animate-pulse">
-              {error}
-            </div>
-          )}
+        <div className="relative z-10">
+          <Link to="/" className="flex items-center gap-2 text-primary font-black uppercase tracking-[0.4em] text-xs">
+            <ChevronLeft size={16} /> Retour au portail
+          </Link>
+        </div>
 
-          <div>
-            <label className="block text-sm font-bold text-dark mb-1">Email</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input 
-                type="email" 
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={loading} // Désactivé pendant l'appel API
-                className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary outline-none transition disabled:opacity-50" 
-                placeholder="@" 
-              />
-            </div>
+        <div className="relative z-10">
+          <h1 className="text-7xl font-black text-white leading-none tracking-tighter uppercase italic">
+            THE <br />
+            MOROCCAN <br />
+            <span className="text-primary">NETWORK.</span>
+          </h1>
+          <div className="w-24 h-2 bg-primary mt-8" />
+          <p className="text-gray-400 mt-8 max-w-md font-medium text-lg leading-relaxed">
+            Accès sécurisé réservé aux membres du bureau exécutif et à l'administration du réseau.
+          </p>
+        </div>
+
+        <div className="relative z-10 text-gray-500 text-[8px] font-bold uppercase tracking-[0.5em]">
+          &copy; 2026 The Moroccan Network - Tous droits réservés.
+        </div>
+      </div>
+
+      {/* --- PARTIE DROITE : LE FORMULAIRE --- */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 md:p-20">
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="w-full max-w-md space-y-12"
+        >
+          {/* Logo mobile uniquement */}
+          <div className="lg:hidden mb-12">
+            <h1 className="text-3xl font-black text-dark tracking-tighter uppercase italic">
+              TM<span className="text-primary">N</span>.
+            </h1>
           </div>
 
-          <div>
-            <label className="block text-sm font-bold text-dark mb-1">Mot de passe</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input 
-                type="password" 
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading} // Désactivé pendant l'appel API
-                className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary outline-none transition disabled:opacity-50" 
-                placeholder="••••••••" 
-              />
-            </div>
-            <div className="flex justify-end">
-  <Link 
-    to="/forgot-password" 
-    className="text-xs font-bold text-primary hover:text-dark transition"
-  >
-    Mot de passe oublié ?
-  </Link>
-</div>
+          <div className="space-y-2">
+            <h2 className="text-4xl font-black text-dark uppercase italic tracking-tighter">Connexion</h2>
+            <p className="text-gray-400 font-medium">Veuillez entrer vos identifiants de session.</p>
           </div>
 
-          <button 
-            type="submit" 
-            disabled={loading}
-            className="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-dark transition shadow-lg flex items-center justify-center space-x-2 disabled:bg-gray-400"
-          >
-            {/* 5. Feedback visuel du chargement */}
-            {loading ? (
-              <>
-                <Loader2 className="animate-spin" size={20} />
-                <span>Connexion en cours...</span>
-              </>
-            ) : (
-              <span>Se connecter</span>
+          <form onSubmit={handleLogin} className="space-y-10">
+            
+            {/* Gestion des erreurs */}
+            {error && (
+              <div className="p-4 border-l-4 border-primary bg-red-50 text-primary text-xs font-black uppercase tracking-widest animate-in fade-in slide-in-from-left-2">
+                {error}
+              </div>
             )}
-          </button>
-        </form>
+
+            <div className="space-y-8">
+              {/* Champ Identifiant */}
+              <div className="relative group">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block group-focus-within:text-primary transition-colors">
+                  Email du Bureau
+                </label>
+                <div className="flex items-center border-b-2 border-gray-100 group-focus-within:border-primary transition-all pb-2">
+                  <Mail size={18} className="text-gray-300 group-focus-within:text-primary transition-colors" />
+                  <input 
+                    type="email" 
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={loading}
+                    className="w-full pl-4 bg-transparent outline-none font-bold text-dark placeholder:text-gray-200" 
+                    placeholder="nom@themoroccannetwork.org" 
+                  />
+                </div>
+              </div>
+
+              {/* Champ Mot de passe */}
+              <div className="relative group">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block group-focus-within:text-primary transition-colors">
+                  Mot de passe
+                </label>
+                <div className="flex items-center border-b-2 border-gray-100 group-focus-within:border-primary transition-all pb-2">
+                  <Lock size={18} className="text-gray-300 group-focus-within:text-primary transition-colors" />
+                  <input 
+                    type="password" 
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={loading}
+                    className="w-full pl-4 bg-transparent outline-none font-bold text-dark placeholder:text-gray-200" 
+                    placeholder="••••••••" 
+                  />
+                </div>
+                <div className="flex justify-end mt-2">
+                  <Link to="/forgot-password" className="text-[10px] font-black text-gray-400 uppercase hover:text-primary transition-colors">
+                    Oubli ?
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="w-full bg-dark text-white py-5 font-black text-xs tracking-[0.3em] hover:bg-primary transition-all flex items-center justify-center gap-4 disabled:bg-gray-200"
+              >
+                {loading ? (
+                  <Loader2 className="animate-spin" size={18} />
+                ) : (
+                  <>
+                    <span>S'AUTHENTIFIER</span>
+                    <ArrowRight size={16} />
+                  </>
+                )}
+              </button>
+              
+              <p className="text-center text-[10px] text-gray-300 font-medium leading-relaxed">
+                En vous connectant, vous acceptez les protocoles de sécurité <br /> et de confidentialité de The Moroccan Network.
+              </p>
+            </div>
+          </form>
+        </motion.div>
       </div>
     </div>
   );
