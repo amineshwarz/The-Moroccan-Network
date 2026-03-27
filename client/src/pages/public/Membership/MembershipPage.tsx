@@ -110,7 +110,7 @@ export const MembershipPage: React.FC = () => {
 
                   <button 
                     onClick={() => setSelectedPlan(plan)}
-                    className="w-full py-4 bg-primary text-amber-300 font-bold hover:bg-dark transition-all flex items-center justify-center gap-2 group"
+                    className="w-full py-4 bg-primary text-white font-bold hover:bg-dark transition-all flex items-center justify-center gap-2 group"
                   >
                     SÉLECTIONNER CETTE FORMULE
                     <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
