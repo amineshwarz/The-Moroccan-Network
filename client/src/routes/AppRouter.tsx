@@ -33,6 +33,7 @@ import {
   AdminSubscribersPage,
   AdminMembersPage,
   AdminNews,
+  AdminNewsEditor,
   AdminTicketing,
 } from '../pages/admin';
 
@@ -103,8 +104,10 @@ const AppRouter: React.FC = () => {
               children: [
                 { path: 'dashboard', element: <AdminDashboard /> },
                 { path: 'events', element: <AdminEvents /> },
-                { path: 'news', element: <AdminNews /> },
                 { path: 'events/:id/tickets', element: <AdminEventDetailsPage /> },
+                { path: 'news', element: <AdminNews /> },
+                { path: 'news/new', element: <AdminNewsEditor /> },
+                { path: 'news/edit/:id', element: <AdminNewsEditor /> },
                 { path: 'ticketing', element: <AdminTicketing /> },
               ],
             },

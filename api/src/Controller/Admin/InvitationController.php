@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Repository\InvitationRepository;
 
 // --- IMPORTATIONS NÉCESSAIRES POUR LE MAIL ---
 use Symfony\Component\Mailer\MailerInterface;
@@ -101,5 +102,38 @@ class InvitationController extends AbstractController
                 'details' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * LISTER TOUTES LES INVITATIONS
+     */
+    #[Route('', name: 'admin_invitation_list', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function list(InvitationRepository $invitationRepo): JsonResponse
+    {
+        $invitations = $invitationRepo->findBy([], ['id' => 'DESC']);
+        
+        $data = array_map(fn($i) => [
+            'id' => $i->getId(),
+            'email' => $i->getEmail(),
+            'token' => $i->getToken(),
+            'isUsed' => $i->isUsed(),
+            'expiresAt' => $i->getExpiresAt()->format('d/m/Y H:i'),
+            'isValid' => $i->getExpiresAt() > new \DateTimeImmutable() && !$i->isUsed()
+        ], $invitations);
+
+        return $this->json($data);
+    }
+
+    /**
+     * SUPPRIMER / RÉVOQUER UNE INVITATION
+     */
+    #[Route('/{id}', name: 'admin_invitation_delete', methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function delete(Invitation $invitation, EntityManagerInterface $em): JsonResponse
+    {
+        $em->remove($invitation);
+        $em->flush();
+        return $this->json(['message' => 'Invitation révoquée.']);
     }
 }

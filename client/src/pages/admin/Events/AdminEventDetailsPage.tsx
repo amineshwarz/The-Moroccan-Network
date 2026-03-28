@@ -3,8 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAxios } from '../../../hooks/useAxios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ArrowLeft, Users, DollarSign, Download, 
-  Search, Mail, UserCheck, ChevronLeft, MoreHorizontal 
+  Users, DollarSign, Download, Search, Mail, 
+  UserCheck, ChevronLeft, MoreHorizontal, History 
 } from 'lucide-react';
 
 export const AdminEventDetailsPage: React.FC = () => {
@@ -16,135 +16,122 @@ export const AdminEventDetailsPage: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await request('GET', `/api/admin/events/${id}/tickets`);
-      setData(res);
+      try {
+        const res = await request('GET', `/api/admin/events/${id}/tickets`);
+        setData(res);
+      } catch (err) { console.error(err); }
     };
     fetchData();
   }, [id]);
 
-  // Filtrage des participants en temps réel
   const filteredParticipants = data?.participants.filter((p: any) => 
     `${p.firstName} ${p.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading && !data) return (
-    <div className="h-screen flex items-center justify-center bg-dark">
-      <motion.div 
-        animate={{ rotate: 360 }} 
-        transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-        className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full"
-      />
+    <div className="h-screen flex flex-col items-center justify-center bg-gray-50 gap-4">
+      <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Certification des accès...</p>
     </div>
   );
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="max-w-7xl mx-auto space-y-8 pb-20"
-    >
-      {/* --- HEADER --- */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <button 
-          onClick={() => navigate('/admin/events')}
-          className="flex items-center gap-2 text-gray-400 hover:text-primary transition-colors font-medium group w-fit"
-        >
-          <ChevronLeft className="group-hover:-translate-x-1 transition-transform" />
-          Retour aux événements
-        </button>
-        <div className="flex gap-3">
-          <button className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-xl border border-white/10 transition-all text-sm font-semibold">
-            <Download size={18} /> Exporter CSV
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-7xl mx-auto space-y-10 pb-20">
+      
+      {/* NAVIGATION & HEADER */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-dark/5 pb-10">
+        <div className="space-y-4">
+          <button onClick={() => navigate('/admin/events')} className="flex items-center gap-2 text-gray-400 hover:text-primary transition-all text-[10px] font-black uppercase tracking-widest group">
+            <ChevronLeft className="group-hover:-translate-x-1 transition-transform" /> Retour à l'agenda
           </button>
+          <h1 className="text-6xl font-black text-dark tracking-tighter uppercase italic leading-[0.8]">
+            Logistique<span className="text-primary">.</span>
+          </h1>
+          <p className="text-primary font-black uppercase tracking-[0.3em] text-xs italic">{data?.eventTitle}</p>
         </div>
+        
+        <button className="bg-dark text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-primary transition-all shadow-xl">
+          <Download size={16} /> Exporter la liste
+        </button>
       </div>
 
-      <header>
-        <h1 className="text-4xl font-black text-amber-950 tracking-tight uppercase italic ">
-          {data?.eventTitle}
-        </h1>
-        <p className="text-gray-500 font-medium">Liste nominative des participants certifiée.</p>
-      </header>
-
-      {/* --- STATS CARDS (Stripe Style) --- */}
+      {/* STATS BENTO (Stripe Style) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
-          { label: 'Participants', value: data?.ticketsSold, total: data?.capacity, icon: <Users />, color: 'text-blue-400' },
-          { label: 'Revenu Total', value: `${data?.totalRevenue}€`, icon: <DollarSign />, color: 'text-green-400' },
-          { label: 'Taux de remplissage', value: `${Math.round((data?.ticketsSold / data?.capacity) * 100)}%`, icon: <UserCheck />, color: 'text-primary' },
+          { label: 'Ventes', value: data?.ticketsSold, total: data?.capacity, icon: <Users />, color: 'text-blue-500' },
+          { label: 'Recette brute', value: `${data?.totalRevenue}€`, icon: <DollarSign />, color: 'text-green-500' },
+          { label: 'Taux de présence', value: `${Math.round((data?.ticketsSold / data?.capacity) * 100)}%`, icon: <UserCheck />, color: 'text-primary' },
         ].map((stat, i) => (
-          <div key={i} className="bg-dark border border-white/5 p-6 shadow-2xl relative overflow-hidden group">
+          <div key={i} className="bg-white border border-gray-100 p-8 rounded-xl shadow-sm relative overflow-hidden group hover:border-primary transition-colors">
             <div className="relative z-10 flex justify-between items-start">
               <div>
-                <p className="text-gray-500 text-xs font-black uppercase tracking-widest mb-1">{stat.label}</p>
-                <h3 className="text-3xl font-bold text-white">{stat.value} {stat.total && <span className="text-sm text-gray-600">/ {stat.total}</span>}</h3>
+                <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-2 italic">{stat.label}</p>
+                <h3 className="text-4xl font-black text-dark tracking-tighter leading-none">
+                    {stat.value} <span className="text-xs text-gray-300">{stat.total && `/ ${stat.total}`}</span>
+                </h3>
               </div>
-              <div className={`p-3 bg-white/5 rounded-2xl ${stat.color}`}>{stat.icon}</div>
+              <div className={`p-4 bg-gray-50 rounded-2xl ${stat.color} group-hover:bg-primary group-hover:text-white transition-all`}>{stat.icon}</div>
             </div>
-            <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-white/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors" />
           </div>
         ))}
       </div>
 
-      {/* --- LIST SECTION --- */}
-      <div className="bg-dark/50 backdrop-blur-xl border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl">
-        <div className="p-6 border-b border-white/5 flex flex-col md:flex-row justify-between gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
-            <input 
-              type="text" 
-              placeholder="Rechercher un nom ou un email..."
-              className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-white outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+      {/* PARTICIPANTS TABLE (Linear Style) */}
+      <div className="bg-white border border-gray-100 rounded-[3rem] shadow-xl overflow-hidden">
+        <div className="p-8 border-b border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-3">
+                <div className="p-2 bg-dark rounded-xl text-white"><History size={20}/></div>
+                <h2 className="text-xl font-black text-dark uppercase italic tracking-tighter">Entrées validées</h2>
+            </div>
+            <div className="relative w-full md:w-80">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                <input 
+                    type="text" placeholder="Rechercher un membre..."
+                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 font-bold text-xs uppercase"
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-white/5 text-[10px] uppercase tracking-[0.2em] font-black text-gray-400">
-                <th className="px-8 py-5">Participant</th>
-                <th className="px-8 py-5">Catégorie</th>
-                <th className="px-8 py-5">Prix Payé</th>
-                <th className="px-8 py-5 text-right">Actions</th>
+          <table className="w-full text-left">
+            <thead className="bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+              <tr>
+                <th className="px-8 py-5">Identité</th>
+                <th className="px-8 py-5">Accréditation</th>
+                <th className="px-8 py-5 text-right">Transaction</th>
+                <th className="px-8 py-5 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
-              <AnimatePresence>
+            <tbody className="divide-y divide-gray-50">
+              <AnimatePresence mode='popLayout'>
                 {filteredParticipants?.map((p: any) => (
                   <motion.tr 
-                    layout
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    key={p.id} 
-                    className="hover:bg-white/2 transition-colors group"
+                    layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    key={p.id} className="hover:bg-primary-light/10 transition-colors group"
                   >
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-linear-to-tr from-primary to-red-400 flex items-center justify-center text-white font-black text-xs">
+                        <div className="w-10 h-10 rounded-full bg-dark text-primary flex items-center justify-center font-black text-[10px] border border-white/10">
                           {p.firstName[0]}{p.lastName[0]}
                         </div>
                         <div>
-                          <p className="text-white font-bold tracking-tight">{p.firstName} {p.lastName}</p>
-                          <p className="text-gray-500 text-xs flex items-center gap-1"><Mail size={12}/> {p.email}</p>
+                          <p className="text-dark font-black uppercase tracking-tight text-sm italic">{p.firstName} {p.lastName}</p>
+                          <p className="text-gray-400 text-[10px] font-bold uppercase">{p.email}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-8 py-6">
-                      <span className="bg-white/5 text-gray-300 px-3 py-1 rounded-lg text-[10px] font-black uppercase border border-white/10">
+                      <span className="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest">
                         {p.category}
                       </span>
                     </td>
-                    <td className="px-8 py-6">
-                      <span className="text-white font-black text-sm">{p.amount} €</span>
+                    <td className="px-8 py-6 text-right">
+                      <span className="text-dark font-black text-lg tracking-tighter">{p.amount} €</span>
                     </td>
                     <td className="px-8 py-6 text-right">
-                      <button className="p-2 text-gray-600 hover:text-white transition-colors">
-                        <MoreHorizontal size={20} />
-                      </button>
+                      <button className="p-2 text-gray-300 hover:text-dark transition-colors"><MoreHorizontal size={18} /></button>
                     </td>
                   </motion.tr>
                 ))}
