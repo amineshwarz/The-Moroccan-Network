@@ -104,7 +104,7 @@ export const EventDetailPage: React.FC = () => {
           <div className="grayscale hover:grayscale-0 transition-all duration-1000 shadow-2xl border border-gray-100">
              <img 
                src={event.image ? `http://localhost:8000${event.image}` : '/placeholder.jpg'} 
-               className="w-full h-[450px] object-cover"
+               className="w-full h-450px object-cover"
                alt=""
              />
           </div>
@@ -118,7 +118,7 @@ export const EventDetailPage: React.FC = () => {
 
         {/* --- COLONNE DROITE : RÉSERVATION --- */}
         <div className="lg:col-span-5">
-          <div className="sticky top-32 bg-dark p-10 text-white shadow-2xl border-t-[12px] border-primary">
+          <div className="sticky top-32 bg-dark p-10 text-white shadow-2xl border-t-12px border-primary">
             <div className="mb-10">
                 <h2 className="text-3xl font-black uppercase tracking-tighter italic">Billeterie Officielle<span className="text-primary">.</span></h2>
                 <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mt-2">The Moroccan Network Service</p>
