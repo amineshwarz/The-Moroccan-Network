@@ -204,7 +204,7 @@ export const EventDetailPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* MESSAGE POUR NON-ADHÉRENTS ÉTUDIANTS */}
+              {/* MESSAGE POUR NON-ADHÉRENTS ÉTUDIANTS ! */}
               {!memberInfo?.isMember && (
                 <div className="flex gap-3 p-4 bg-white/5 border border-white/10 italic text-[10px] text-gray-400">
                   <AlertCircle size={16} className="shrink-0" />
