@@ -52,7 +52,7 @@ class EventController extends AbstractController
         // c'est que le fichier est trop gros pour la configuration PHP actuelle.
         if (empty($data)) {
             return $this->json([
-                'error' => 'Le serveur a reçu un formulaire vide. Vérifiez la taille de votre image (Max 2Mo par défaut sur PHP).'
+                'error' => 'Le serveur a reçu un formulaire vide. Vérifiez la taille de votre image (Max 10Mo par défaut sur PHP).'
             ], 400);
         }
 
@@ -99,7 +99,7 @@ class EventController extends AbstractController
 
     /**
      * SUPPRIMER UN ÉVÉNEMENT
-     * Supprime l'entrée et nettoie les prix orphelins (via orphanRemoval: true)
+     * Supprime l'entrée et nettoie les prix orphelins (via orphanRemoval: true)!
      */
     #[Route('/{id}', name: 'event_delete', methods: ['DELETE'])]
     #[IsGranted('ROLE_USER')]
