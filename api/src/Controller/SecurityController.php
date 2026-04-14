@@ -18,7 +18,7 @@ class SecurityController extends AbstractController
 
         // Si aucun utilisateur n'est connecté (ne devrait pas arriver avec json_login bien configuré)
         if (!$user) {
-            return $this->json(['error' => 'Identifiants invalides'], 401);
+            return $this->json(['error' => 'Identifiants invalides !!'], 401);
         }
 
         // 3. LA SOLUTION : On précise à l'éditeur que $user est une instance de notre classe User
