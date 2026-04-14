@@ -33,18 +33,6 @@ class HelloAssoService
         });
     }
 
-    // public function createCheckoutIntent(array $data): array
-    // {
-    //     $token = $this->getAccessToken();  
-    //     // $orgSlug = 'moroccan-4-life'; // je l'ai mis en paramètre de service qui est dans .env.local
-
-    //     $response = $this->client->request('POST', "https://api.helloasso-sandbox.com/v5/organizations/{$this->orgSlug}/checkout-intents", [
-    //         'auth_bearer' => $token,
-    //         'json' => $data,
-    //     ]);
-
-    //     return $response->toArray();
-    // }
 
     public function createCheckoutIntent(array $data): array
     {
