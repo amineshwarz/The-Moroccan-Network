@@ -68,4 +68,30 @@ class MailService
 
         $this->mailer->send($email);
     }
+
+
+    /**
+     * Envoie le message du formulaire de contact au Bureau
+     */
+    public function sendContactMessage(array $contactData): void
+    {
+        $email = (new TemplatedEmail())
+            // L'expéditeur technique (ton domaine)
+            ->from('system@themoroccannetwork.org') 
+            // L'adresse de l'association qui va recevoir le message
+            ->to('bureau@themoroccannetwork.org') 
+            // TRÈS IMPORTANT : On met l'email du visiteur en "Reply-To" 
+            // pour que tu puisses lui répondre en cliquant simplement sur "Répondre"
+            ->replyTo($contactData['email'])
+            ->subject('NOUVEAU MESSAGE : ' . $contactData['subject'])
+            ->htmlTemplate('emails/contact_form.html.twig')
+            ->context([
+                'name' => $contactData['name'],
+                'visitorEmail' => $contactData['email'],
+                'subject' => $contactData['subject'],
+                'message' => $contactData['message'],
+            ]);
+
+        $this->mailer->send($email);
+    }
 }
