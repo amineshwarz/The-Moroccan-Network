@@ -89,53 +89,62 @@ class PaymentController extends AbstractController
      */
     #[Route('/event/{id}/ticket', name: 'event_ticket_payment', methods: ['POST'])]
     public function initiateTicket(
-        Event $event, // Symfony récupère l'objet Event automatiquement via l'ID dans l'URL
+        Event $event, 
         Request $request, 
         HelloAssoService $helloAsso, 
         EntityManagerInterface $em
     ): JsonResponse {
-        $data = json_decode($request->getContent(), true);
-
-        // 1. On crée le Ticket en base de données (Statut PENDING)
-        $ticket = new Ticket();
-        $ticket->setFirstName($data['firstName']);
-        $ticket->setLastName($data['lastName']);
-        $ticket->setEmail($data['email']);
-        $ticket->setCategory($data['category']); // ex: "Tarif Adhérent"
-        $ticket->setAmount((int)$data['amount']); // Montant en centimes
-        $ticket->setStatus('PENDING');
-        $ticket->setEvent($event); // On lie le ticket à l'événement
-
-        $em->persist($ticket);
-        $em->flush();
-
-        // 2. Préparation de l'appel HelloAsso
-        $baseUrl = 'https://exie-nonadjustable-overfastidiously.ngrok-free.dev'; 
-
-        $body = [
-            'totalAmount' => (int)$data['amount'],
-            'initialAmount' => (int)$data['amount'],
-            'itemName' => "Ticket : " . $event->getTitle() . " (" . $data['category'] . ")",
-            'backUrl' => $baseUrl . '/evenements',
-            'returnUrl' => $baseUrl . '/api/payment/success?type=ticket',
-            'errorUrl' => $baseUrl . '/api/payment/error',
-            'containsDonation' => false,
-            'payer' => [
-                'firstName' => $data['firstName'],
-                'lastName' => $data['lastName'],
-                'email' => $data['email'],
-            ],
-            'metadata' => [
-                // C'EST ICI QU'ON DIT AU WEBHOOK QUE C'EST UN TICKET ET NON UNE ADHÉSION
-                'ticket_id' => (string) $ticket->getId() 
-            ]
-        ];
-
         try {
+            $data = json_decode($request->getContent(), true);
+
+            if (!$data) {
+                return $this->json(['error' => 'Données de formulaire invalides'], 400);
+            }
+
+            // 1. Création du Ticket
+            $ticket = new Ticket();
+            // Utilisation de l'opérateur ?? pour garantir qu'aucune valeur n'est NULL
+            $ticket->setFirstName($data['firstName'] ?? 'Inconnu');
+            $ticket->setLastName($data['lastName'] ?? 'Inconnu');
+            $ticket->setEmail($data['email'] ?? '');
+            $ticket->setCategory($data['category'] ?? 'STANDARD');
+            $ticket->setAmount((int)($data['amount'] ?? 0));
+            $ticket->setStatus('PENDING');
+            $ticket->setEvent($event);
+
+            $em->persist($ticket);
+            $em->flush();
+
+            // 2. Préparation du Body pour HelloAsso
+            // ATTENTION : Vérifie que ton adresse NGROK est toujours la bonne !
+            $baseUrl = 'https://exie-nonadjustable-overfastidiously.ngrok-free.dev'; 
+
+            $body = [
+                'totalAmount' => (int)$data['amount'],
+                'initialAmount' => (int)$data['amount'],
+                'itemName' => "Billet : " . $event->getTitle() . " [" . ($data['category'] ?? 'ST') . "]",
+                'backUrl' => $baseUrl . '/evenements/' . $event->getId(), 
+                'returnUrl' => $baseUrl . '/api/payment/success?type=ticket', // Ajout du paramètre type
+                'errorUrl' => $baseUrl . '/api/payment/error',
+                'containsDonation' => false,
+                'payer' => [
+                    'firstName' => $data['firstName'] ?? 'Client',
+                    'lastName' => $data['lastName'] ?? 'Inconnu',
+                    'email' => $data['email'] ?? '',
+                ],
+                'metadata' => [
+                    'ticket_id' => (string) $ticket->getId() 
+                ]
+            ];
+
+            // 3. Appel au service HelloAsso
             $checkoutData = $helloAsso->createCheckoutIntent($body);
+            
             return $this->json(['redirectUrl' => $checkoutData['redirectUrl']]);
+
         } catch (\Exception $e) {
-            return $this->json(['error' => $e->getMessage()], 500);
+            // En renvoyant $e->getMessage(), tu verras l'erreur exacte dans ta console React
+            return $this->json(['error' => 'Erreur HelloAsso : ' . $e->getMessage()], 500);
         }
     }
 }

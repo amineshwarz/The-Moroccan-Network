@@ -46,7 +46,7 @@ export const EventDetailPage: React.FC = () => {
       setMemberInfo(data);
       // Si reconnu, on aide l'utilisateur en pré-remplissant son prénom
       if (data.isMember && data.firstName) {
-        setBookingForm(prev => ({...prev, firstName: data.firstName, email: email}));
+        setBookingForm(prev => ({...prev, firstName: data.firstName, lastName:data.lastName}));
       }
     } catch (err) {
       // Si 404 ou erreur, on considère qu'il n'est pas membre
@@ -99,7 +99,10 @@ export const EventDetailPage: React.FC = () => {
         amount: bookingForm.amount * 100 
       });
       if (response.redirectUrl) window.location.href = response.redirectUrl;
-    } catch (err) { alert("Erreur lors de la préparation du paiement."); }
+    } catch (err) { 
+      const msg = err.response?.data?.error || "Erreur inconnue";
+      alert("Détails de l'erreur : " + msg); 
+    }
   };
 
   if (!event) return null;
