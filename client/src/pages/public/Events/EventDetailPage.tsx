@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { CATEGORY_LABELS } from '../../../constants/categories';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAxios } from '../../../hooks/useAxios';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -212,7 +213,9 @@ export const EventDetailPage: React.FC = () => {
                         }} 
                       />
                       <div className="flex flex-col">
-                        <span className="font-black text-[10px] uppercase tracking-widest">{p.category}</span>
+                      <span className="font-black text-[10px] uppercase tracking-widest">
+                        {CATEGORY_LABELS[p.category] || p.category}
+                      </span>
                         {p.category.includes('STUDENT') && <span className="text-[7px] text-primary font-bold mt-1">CARTE ÉTUDIANT OBLIGATOIRE</span>}
                       </div>
                       <span className="font-black text-xl tracking-tighter">{p.amount}€</span>

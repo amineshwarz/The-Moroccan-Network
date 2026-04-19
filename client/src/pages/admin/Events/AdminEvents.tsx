@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAxios } from '../../../hooks/useAxios';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
+// --- IMPORTATION DE TES LABELS CENTRALISÉS ---
+import { CATEGORY_LABELS } from '../../../constants/categories';
 import { 
   Plus, Trash2, Calendar as CalendarIcon, MapPin, 
   Euro, Save, X, Eye, EyeOff, Edit3, Image as ImageIcon, 
@@ -31,14 +33,13 @@ export const AdminEvents: React.FC = () => {
   const [prices, setPrices] = useState<PriceRow[]>([{ category: 'PUBLIC', amount: 0 }]);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const CATEGORIES = [
-    { id: 'PUBLIC', label: 'Public (Standard)' },
-    { id: 'PUBLIC_STUDENT', label: 'Public (Étudiant)' },
-    { id: 'ADHERENT', label: 'Adhérent (Normal)' },
-    { id: 'ADHERENT_STUDENT', label: 'Adhérent (Étudiant)' },
-    { id: 'STAFF', label: 'Staff / Bureau' },
-    { id: 'GUEST', label: 'Guest' },
-  ];
+
+  // --- LOGIQUE DES CATÉGORIES (Utilise maintenant ton import) ---
+  // On transforme ton objet CATEGORY_LABELS en tableau pour le menu déroulant
+  const CATEGORIES = Object.entries(CATEGORY_LABELS).map(([id, label]) => ({
+    id,
+    label
+  }));
 
   const fetchEvents = async () => {
     try {
@@ -126,7 +127,7 @@ export const AdminEvents: React.FC = () => {
       {/* HEADER AVEC TOGGLE DESIGN */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-dark/5 pb-10">
         <div>
-          <h1 className="text-6xl font-black text-dark tracking-tighter uppercase italic">
+          <h1 className="text-6xl font-black text-dark tracking-tighter uppercase italic leading-none">
             Agenda<span className="text-primary">.</span>
           </h1>
           <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] mt-2 flex items-center gap-2">
@@ -152,22 +153,23 @@ export const AdminEvents: React.FC = () => {
       </div>
 
       {/* LISTE DYNAMIQUE */}
-      <motion.div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>
-        <AnimatePresence mode='wait'>
+      <motion.div layout className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>
+        <AnimatePresence mode='popLayout'>
           {events.map((event) => (
             <motion.div
               layout
               key={event.id}
-              initial={{ opacity: 0,  }}
-              animate={{ opacity: 1,  }}
-              exit={{ opacity: 0, }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              whileHover={{ y: -5 }}
               onClick={() => navigate(`/admin/events/${event.id}/tickets`)}
               className={`group cursor-pointer bg-white border border-gray-100 overflow-hidden transition-all duration-500 shadow-sm ${
-                viewMode === 'grid' ? 'rounded-xl flex flex-col hover:shadow-2xl' : 'rounded-xl flex flex-row items-center p-4 hover:shadow-lg'
+                viewMode === 'grid' ? 'rounded-[2.5rem] flex flex-col hover:shadow-2xl' : 'rounded-3xl flex flex-row items-center p-4 hover:shadow-lg'
               }`}
             >
               {/* IMAGE CONTAINER */}
-              <div className={`relative overflow-hidden bg-gray-50 shrink-0 ${viewMode === 'grid' ? 'h-56 w-full' : 'h-24 w-24 md:h-32 md:w-32 rounded-xl'}`}>
+              <div className={`relative overflow-hidden bg-gray-50 shrink-0 ${viewMode === 'grid' ? 'h-56 w-full' : 'h-24 w-24 md:h-32 md:w-32 rounded-2xl'}`}>
                 {event.image ? (
                   <img src={`http://localhost:8000${event.image}`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="" />
                 ) : (
@@ -220,7 +222,7 @@ export const AdminEvents: React.FC = () => {
       {/* --- MODAL GLASSMORPHISM --- */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsModalOpen(false)} className="absolute inset-0 bg-dark/60 backdrop-blur-md" />
             <motion.div 
               initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
@@ -263,7 +265,7 @@ export const AdminEvents: React.FC = () => {
                   <input type="number" required className="w-full p-4 bg-dark/5 border-none rounded-2xl outline-none focus:ring-2 focus:ring-primary font-bold text-dark" value={capacity} onChange={e => setCapacity(parseInt(e.target.value))} placeholder="Capacité (ex: 100)" />
                 </div>
 
-                {/* GRILLE TARIFAIRE */}
+                {/* GRILLE TARIFAIRE (Mise à jour avec Labels) */}
                 <div className="space-y-4 pt-6 border-t border-dark/5">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="font-black text-dark italic tracking-tighter uppercase">Tarification</h3>
@@ -279,22 +281,17 @@ export const AdminEvents: React.FC = () => {
                           onChange={e => updatePriceRow(index, 'category', e.target.value)}
                         >
                           <option value="" disabled>Catégorie</option>
+                          {/* ON UTILISE LE TABLEAU GÉNÉRÉ À PARTIR DE TON IMPORT */}
                           {CATEGORIES.map(cat => (
                             <option key={cat.id} value={cat.id}>{cat.label}</option>
                           ))}
                         </select>
                         
                         <div className="flex items-center gap-1 bg-white/80 px-3 py-1 rounded-xl">
-                          <input 
-                            type="number" className="w-10 bg-transparent text-xs font-black text-primary outline-none"
-                            value={p.amount} onChange={e => updatePriceRow(index, 'amount', parseFloat(e.target.value))}
-                          />
+                          <input type="number" className="w-10 bg-transparent text-xs font-black text-primary outline-none" value={p.amount} onChange={e => updatePriceRow(index, 'amount', parseFloat(e.target.value))} />
                           <Euro size={12} className="text-gray-400" />
                         </div>
-                        
-                        <button type="button" onClick={() => removePriceRow(index)} className="text-gray-300 hover:text-primary">
-                            <Trash2 size={16} />
-                        </button>
+                        <button type="button" onClick={() => removePriceRow(index)} className="text-gray-300 hover:text-primary"><Trash2 size={16} /></button>
                       </div>
                     ))}
                   </div>
@@ -306,7 +303,7 @@ export const AdminEvents: React.FC = () => {
                     <input type="checkbox" id="pub" checked={isPublished} onChange={e => setIsPublished(e.target.checked)} className="w-6 h-6 accent-primary rounded-xl cursor-pointer" />
                     <label htmlFor="pub" className="text-xs font-black text-dark uppercase tracking-tighter cursor-pointer">Mettre en ligne</label>
                   </div>
-                  <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="bg-dark text-white px-10 py-5 font-black text-lg hover:bg-primary transition-all shadow-2xl flex items-center justify-center gap-3 disabled:opacity-50">
+                  <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="bg-dark text-white px-10 py-5 rounded-[2rem] font-black text-lg hover:bg-primary transition-all shadow-2xl flex items-center justify-center gap-3 disabled:opacity-50">
                     {loading ? <Loader2 className="animate-spin" /> : <Save size={22} />}
                     <span>{editingEventId ? 'ENREGISTRER' : 'CRÉER L\'EVENT'}</span>
                   </motion.button>
