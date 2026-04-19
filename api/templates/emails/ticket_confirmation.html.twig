@@ -1,0 +1,20 @@
+<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee;">
+    <div style="background-color: #330000; padding: 30px; text-align: center;">
+        <h1 style="color: #ff3300; margin: 0; text-transform: uppercase;">The Moroccan Network</h1>
+    </div>
+    <div style="padding: 40px; color: #330000;">
+        <h2 style="font-style: italic; text-transform: uppercase;">Votre place est confirmée.</h2>
+        <p>Bonjour <strong>{{ ticket.firstName }}</strong>,</p>
+        <p>Nous avons bien reçu votre paiement pour l'événement suivant :</p>
+        
+        <div style="margin: 30px 0; padding: 25px; border: 2px solid #330000;">
+            <h3 style="margin: 0 0 10px 0; color: #ff3300;">{{ event.title }}</h3>
+            <p style="margin: 5px 0;">📅 {{ event.date|date('d/m/Y à H:i') }}</p>
+            <p style="margin: 5px 0;">📍 {{ event.location }}</p>
+            <p style="margin: 5px 0; font-size: 12px; color: #666;">Billet n°: {{ ticket.id }} ({{ ticket.category }})</p>
+        </div>
+
+        <p style="font-size: 14px;">Veuillez présenter cet email ou votre pièce d'identité à l'accueil.</p>
+        <p>L'excellence en mouvement.</p>
+    </div>
+</div>

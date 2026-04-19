@@ -227,7 +227,7 @@ export const EventDetailPage: React.FC = () => {
               {/* MESSAGE DE CONVERSION SI NON-MEMBRE */}
               {memberInfo && !memberInfo.isMember && (
                 <div className="p-5 bg-white/5 border border-white/5 text-[10px] text-gray-400 italic">
-                   <p>Économisez jusqu'à 15€ en devenant membre. <Link to="/adhesion" className="text-primary font-bold underline ml-1">Adhérer maintenant</Link></p>
+                   <p>Économisez plus en devenant membre. <Link to="/adhesion" className="text-primary font-bold underline ml-1">Adhérer maintenant</Link></p>
                 </div>
               )}
 

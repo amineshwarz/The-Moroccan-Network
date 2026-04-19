@@ -1,0 +1,23 @@
+{# templates/emails/staff_invitation.html.twig #}
+<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ffddcc; border-radius: 15px; overflow: hidden;">
+    <div style="background-color: #330000; padding: 20px; text-align: center;">
+        <h1 style="color: #ff3300; margin: 0; letter-spacing: 2px;">THE MOROCCAN NETWORK</h1>
+    </div>
+    
+    <div style="padding: 30px; color: #330000; line-height: 1.6;">
+        <h2 style="color: #ff3300; text-transform: uppercase; font-style: italic;">Bienvenue dans l'équipe !</h2>
+        <p>Bonjour,</p>
+        <p>Vous avez été invité par l'administrateur à rejoindre le <strong>bureau exécutif</strong> de l'association.</p>
+        <p>Pour finaliser la création de votre compte et accéder à votre terminal de gestion, cliquez sur le bouton ci-dessous :</p>
+        
+        <div style="text-align: center; margin: 40px 0;">
+            <a href="{{ link }}" style="background-color: #ff3300; color: white; padding: 15px 30px; text-decoration: none; font-weight: bold; display: inline-block; border-radius: 5px;">
+                ACTIVER MON ACCÈS BUREAU
+            </a>
+        </div>
+        
+        <p style="font-size: 0.8em; color: #666; border-top: 1px solid #eee; pt-20;">
+            Note : Ce lien est à usage unique et expirera sous 48 heures.
+        </p>
+    </div>
+</div>

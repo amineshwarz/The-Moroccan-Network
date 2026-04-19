@@ -3,7 +3,8 @@
 namespace App\Controller;
 
 use App\Repository\SubscriberRepository;
-use App\Repository\TicketRepository; // Import du Repository des Tickets
+use App\Repository\TicketRepository; 
+use App\Service\MailService; // On importe le nouveau service de mail
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,8 +17,9 @@ class WebhookController extends AbstractController
     public function handleHelloAsso(
         Request $request, 
         SubscriberRepository $subscriberRepository, 
-        TicketRepository $ticketRepository, // On injecte le repository des tickets
-        EntityManagerInterface $em
+        TicketRepository $ticketRepository, 
+        EntityManagerInterface $em,
+        MailService $mailService // On injecte le service de mail ici
     ): Response {
         
         try {
@@ -41,7 +43,9 @@ class WebhookController extends AbstractController
             if ($subscriberId) {
                 $subscriber = $subscriberRepository->find((int)$subscriberId);
 
-                if ($subscriber) {
+                // CHANGEMENT : On vérifie que le statut n'est PAS déjà ACTIVE
+                // Pourquoi ? Pour éviter d'envoyer 2 fois le mail si HelloAsso renvoie le webhook
+                if ($subscriber && $subscriber->getStatus() !== 'ACTIVE') {
                     // On passe le statut en ACTIVE
                     $subscriber->setStatus('ACTIVE');
                     
@@ -51,7 +55,11 @@ class WebhookController extends AbstractController
 
                     $em->flush();
                     
-                    file_put_contents('webhook_success.log', "[" . date('Y-m-d H:i:s') . "] Adhérent $subscriberId activé.\n", FILE_APPEND);
+                    // --- NOUVEAU : ENVOI DU MAIL DE CONFIRMATION D'ADHÉSION ---
+                    // On appelle la méthode de notre service pour envoyer le mail Twig
+                    $mailService->sendMembershipConfirmation($subscriber);
+                    
+                    file_put_contents('webhook_success.log', "[" . date('Y-m-d H:i:s') . "] Adhérent $subscriberId activé et mail envoyé.\n", FILE_APPEND);
                 }
             }
 
@@ -59,20 +67,24 @@ class WebhookController extends AbstractController
             if ($ticketId) {
                 $ticket = $ticketRepository->find((int)$ticketId);
 
-                if ($ticket) {
+                // CHANGEMENT : On vérifie ici aussi que le statut n'est PAS déjà ACTIVE
+                if ($ticket && $ticket->getStatus() !== 'ACTIVE') {
                     // On active le ticket pour qu'il soit valide à l'entrée
                     $ticket->setStatus('ACTIVE');
                     
-                    // On peut aussi stocker l'ID HelloAsso sur le ticket si nécessaire
-                    // (Note: assure-toi d'avoir le champ helloAssoId dans ton entité Ticket)
+                    // On stocke l'ID HelloAsso sur le ticket
                     if (method_exists($ticket, 'setHelloAssoPayerId')) {
                         $payerId = $payload['data']['payer']['id'] ?? null;
                         $ticket->setHelloAssoPayerId((string)$payerId);
                     }
 
                     $em->flush();
+
+                    // --- NOUVEAU : ENVOI DU BILLET PAR EMAIL ---
+                    // On envoie le mail avec les détails de l'événement (date, lieu, etc.)
+                    $mailService->sendTicketConfirmation($ticket);
                     
-                    file_put_contents('webhook_success.log', "[" . date('Y-m-d H:i:s') . "] Ticket $ticketId activé pour l'évenement.\n", FILE_APPEND);
+                    file_put_contents('webhook_success.log', "[" . date('Y-m-d H:i:s') . "] Ticket $ticketId activé et mail envoyé.\n", FILE_APPEND);
                 }
             }
         }
