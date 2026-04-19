@@ -26,6 +26,11 @@ security:
             stateless: true
             security: false # On désactive la sécurité pour cette route précise, car HelloAsso ne peut pas gérer les jetons JWT. C'est un webhook public qui reçoit des notifications de HelloAsso, donc il doit être accessible sans authentification.
 
+            
+        membership_check:
+            pattern: ^/api/membership/check
+            stateless: true
+            security: false
         # 1. PARE-FEU POUR LE LOGIN (Génération du jeton)
         # On intercepte les requêtes sur /api/login pour créer le JWT
         login:
@@ -50,6 +55,7 @@ security:
     access_control:
         # La route de login doit être publique pour pouvoir se connecter !
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/membership/check, roles: PUBLIC_ACCESS }
 
         # Seul l'ADMIN peut voir les adhérents HelloAsso et gérer les invitations
         - { path: ^/api/admin/subscribers, roles: ROLE_ADMIN }

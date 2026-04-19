@@ -31,6 +31,14 @@ export const AdminEvents: React.FC = () => {
   const [prices, setPrices] = useState<PriceRow[]>([{ category: 'PUBLIC', amount: 0 }]);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const CATEGORIES = [
+    { id: 'PUBLIC', label: 'Public (Standard)' },
+    { id: 'PUBLIC_STUDENT', label: 'Public (Étudiant)' },
+    { id: 'ADHERENT', label: 'Adhérent (Normal)' },
+    { id: 'ADHERENT_STUDENT', label: 'Adhérent (Étudiant)' },
+    { id: 'STAFF', label: 'Staff / Bureau' },
+    { id: 'GUEST', label: 'Guest' },
+  ];
 
   const fetchEvents = async () => {
     try {
@@ -264,12 +272,29 @@ export const AdminEvents: React.FC = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {prices.map((p, index) => (
                       <div key={index} className="flex gap-2 items-center bg-dark/5 p-3 rounded-2xl border border-white/50">
-                        <input placeholder="CATÉGORIE" className="flex-1 bg-transparent p-1 text-[10px] font-black outline-none uppercase placeholder:text-gray-400" value={p.category} onChange={e => updatePriceRow(index, 'category', e.target.value.toUpperCase())} />
+                        <select 
+                          required
+                          className="flex-1 bg-transparent p-1 text-[10px] font-black outline-none uppercase text-dark cursor-pointer"
+                          value={p.category}
+                          onChange={e => updatePriceRow(index, 'category', e.target.value)}
+                        >
+                          <option value="" disabled>Catégorie</option>
+                          {CATEGORIES.map(cat => (
+                            <option key={cat.id} value={cat.id}>{cat.label}</option>
+                          ))}
+                        </select>
+                        
                         <div className="flex items-center gap-1 bg-white/80 px-3 py-1 rounded-xl">
-                          <input type="number" className="w-10 bg-transparent text-xs font-black text-primary outline-none" value={p.amount} onChange={e => updatePriceRow(index, 'amount', parseFloat(e.target.value))} />
+                          <input 
+                            type="number" className="w-10 bg-transparent text-xs font-black text-primary outline-none"
+                            value={p.amount} onChange={e => updatePriceRow(index, 'amount', parseFloat(e.target.value))}
+                          />
                           <Euro size={12} className="text-gray-400" />
                         </div>
-                        <button type="button" onClick={() => removePriceRow(index)} className="text-gray-300 hover:text-primary"><Trash2 size={16} /></button>
+                        
+                        <button type="button" onClick={() => removePriceRow(index)} className="text-gray-300 hover:text-primary">
+                            <Trash2 size={16} />
+                        </button>
                       </div>
                     ))}
                   </div>
