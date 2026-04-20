@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Article;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\String\Slugger\SluggerInterface;
@@ -18,16 +19,22 @@ class ArticleManager
     /**
      * Sauvegarde ou met à jour un article
      */
-    public function save(Article $article, array $data, ?UploadedFile $imageFile): Article
+    public function save(Article $article, array $data, ?UploadedFile $imageFile,  User $author): Article
     {
+        // Si c'est une création, on lie l'auteur
+        if ($article->getId() === null) {
+            $article->setCreatedBy($author);
+            $article->setCreatedAt(new \DateTimeImmutable());
+        }
+
         $article->setTitle($data['title'] ?? 'Sans titre');
         $article->setContent($data['content'] ?? '');
         $article->setIsPublished($data['isPublished'] === '1' || $data['isPublished'] === true);
         
         // Initialisation de la date si c'est une création
-        if ($article->getCreatedAt() === null) {
-            $article->setCreatedAt(new \DateTimeImmutable());
-        }
+        // if ($article->getCreatedAt() === null) {
+        //     $article->setCreatedAt(new \DateTimeImmutable());
+        // }
 
         // Génération du Slug (ex: "Bienvenue à tous" -> "bienvenue-a-tous")
         $article->setSlug($this->slugger->slug($article->getTitle())->lower());

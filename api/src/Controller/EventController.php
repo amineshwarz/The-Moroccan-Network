@@ -41,7 +41,7 @@ class EventController extends AbstractController
      * Reçoit un FormData (Multipart) pour supporter l'upload d'image
      */
     #[Route('/create', name: 'event_create', methods: ['POST'])]
-    #[IsGranted('ROLE_USER')]
+    #[IsGranted('ROLE_ADMIN')]
     public function create(Request $request): JsonResponse
     {
         // On récupère toutes les données textuelles du formulaire
@@ -52,16 +52,17 @@ class EventController extends AbstractController
         // c'est que le fichier est trop gros pour la configuration PHP actuelle.
         if (empty($data)) {
             return $this->json([
-                'error' => 'Le serveur a reçu un formulaire vide. Vérifiez la taille de votre image (Max 2Mo par défaut sur PHP).'
+                'error' => 'Le serveur a reçu un formulaire vide. Vérifiez la taille de votre image (Max 10Mo par défaut sur PHP).'
             ], 400);
         }
 
         // On récupère le fichier binaire de l'image
         $imageFile = $request->files->get('image');
+        $user = $this->getUser(); // Récupère l'utilisateur connecté pour l'attribution de l'auteur
 
         try {
             // On passe l'entité neuve, les données et l'image au service de gestion
-            $event = $this->eventManager->save(new Event(), $data, $imageFile);
+            $event = $this->eventManager->save(new Event(), $data, $imageFile, $user);
 
             return $this->json([
                 'message' => 'Événement créé avec succès',
@@ -79,9 +80,10 @@ class EventController extends AbstractController
      * les fichiers en méthode PUT ou PATCH via FormData.
      */
     #[Route('/{id}/update', name: 'event_update', methods: ['POST'])]
-    #[IsGranted('ROLE_USER')]
+    #[IsGranted('ROLE_ADMIN')]
     public function update(Event $event, Request $request): JsonResponse
     {
+        $user = $this->getUser(); // Récupère l'utilisateur connecté pour la traçabilité (même si on ne change pas l'auteur)
         $data = $request->request->all();
         $imageFile = $request->files->get('image');
 
@@ -90,7 +92,7 @@ class EventController extends AbstractController
         }
 
         try {
-            $this->eventManager->save($event, $data, $imageFile);
+            $this->eventManager->save($event, $data, $imageFile,$user);
             return $this->json(['message' => 'Événement mis à jour avec succès']);
         } catch (\Exception $e) {
             return $this->json(['error' => $e->getMessage()], 400);
@@ -99,10 +101,10 @@ class EventController extends AbstractController
 
     /**
      * SUPPRIMER UN ÉVÉNEMENT
-     * Supprime l'entrée et nettoie les prix orphelins (via orphanRemoval: true)
+     * Supprime l'entrée et nettoie les prix orphelins (via orphanRemoval: true)!
      */
     #[Route('/{id}', name: 'event_delete', methods: ['DELETE'])]
-    #[IsGranted('ROLE_USER')]
+    #[IsGranted('ROLE_ADMIN')]
     public function delete(Event $event): JsonResponse
     {
         $this->eventManager->delete($event);

@@ -35,9 +35,10 @@ class ArticleController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function create(Request $request): JsonResponse
     {
+        $user = $this->getUser(); 
         $data = $request->request->all();
         $imageFile = $request->files->get('image');
-        $article = $this->articleManager->save(new Article(), $data, $imageFile);
+        $article = $this->articleManager->save(new Article(), $data, $imageFile, $user);
         return $this->json(['message' => 'Article créé'], 201);
     }
 
@@ -49,9 +50,16 @@ class ArticleController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function update(Article $article, Request $request): JsonResponse
     {
+        $user = $this->getUser();
+
+         // Autorisé si : utilisateur est l'auteur OR est ADMIN/SUPER_ADMIN
+        if ($article->getCreatedBy() !== $user && !$this->isGranted('ROLE_ADMIN')) {
+            return $this->json(['error' => 'Accès refusé. Vous ne pouvez modifier que vos propres articles.'], 403);
+        }
+
         $data = $request->request->all();
         $imageFile = $request->files->get('image');
-        $this->articleManager->save($article, $data, $imageFile);
+        $this->articleManager->save($article, $data, $imageFile, $user);
         return $this->json(['message' => 'Article mis à jour']);
     }
 
@@ -59,6 +67,10 @@ class ArticleController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function delete(Article $article, EntityManagerInterface $em): JsonResponse
     {
+        $user = $this->getUser();
+        if ($article->getCreatedBy() !== $user && !$this->isGranted('ROLE_ADMIN')) {
+            return $this->json(['error' => 'Accès refusé. Vous ne pouvez supprimer que vos propres articles.'], 403);
+        }
         $em->remove($article);
         $em->flush();
         return $this->json(['message' => 'Article supprimé']);

@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\User;
 use App\Entity\Event;
 use App\Entity\EventPrice;
 use Doctrine\ORM\EntityManagerInterface;
@@ -17,8 +18,13 @@ class EventManager
     /**
      * Sauvegarde un événement avec gestion d'image et de prix
      */
-    public function save(Event $event, array $data, ?UploadedFile $imageFile): Event
+    public function save(Event $event, array $data, ?UploadedFile $imageFile, User $author): Event
     {
+
+        if ($event->getId() === null) {     // Assignation de l'auteur uniquement à la création
+            $event->setCreatedBy($author);
+        }
+
         // 1. Remplissage des données de base
         $event->setTitle($data['title']);
         $event->setDescription($data['description']);
