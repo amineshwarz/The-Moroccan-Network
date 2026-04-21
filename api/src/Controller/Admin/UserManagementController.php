@@ -87,4 +87,27 @@ class UserManagementController extends AbstractController
             'message' => 'Le rôle de ' . $targetUser->getFirstName() . ' a été mis à jour.'
         ]);
     }
+
+    /**
+     * SUPPRIMER UN MEMBRE DU BUREAU
+     */
+    #[Route('/{id}', name: 'admin_user_delete', methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN')] // Seul l'Admin peut supprimer
+    public function delete(User $user, EntityManagerInterface $em): JsonResponse
+    {
+        // Sécurité : On empêche l'Admin de supprimer son propre compte par erreur
+        if ($this->getUser() === $user) {
+            return $this->json(['error' => 'Vous ne pouvez pas supprimer votre propre compte.'], 403);
+        }
+
+        // Sécurité : On empêche de supprimer le Président (Super Admin) via la liste
+        if (in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
+            return $this->json(['error' => 'Action interdite : Le compte du Président ne peut pas être supprimé ici.'], 403);
+        }
+
+        $em->remove($user);
+        $em->flush();
+
+        return $this->json(['message' => 'Membre supprimé avec succès.']);
+    }
 }

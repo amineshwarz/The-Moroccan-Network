@@ -4,7 +4,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Shield, Lock, ShieldCheck, Search, 
-  ChevronRight, AlertTriangle, X, Check
+  ChevronRight, AlertTriangle, X, Check,Trash2
 } from 'lucide-react';
 
 export const AdminMembersPage: React.FC = () => {
@@ -12,6 +12,7 @@ export const AdminMembersPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { request, loading } = useAxios();
   const { user: currentUser } = useAuth();
+  const amISuperAdmin = currentUser?.roles?.includes('ROLE_SUPER_ADMIN');
 
   // État pour la modal de confirmation
   const [pendingChange, setPendingChange] = useState<{userId: number, userName: string, role: string} | null>(null);
@@ -35,6 +36,18 @@ export const AdminMembersPage: React.FC = () => {
     } catch (err) {
       alert("Action refusée.");
       setPendingChange(null);
+    }
+  };
+
+  const handleDelete = async (userId: number, userName: string) => {
+    if (window.confirm(`Êtes-vous sûr de vouloir supprimer ${userName} ?`)) {
+      try {
+        await request('DELETE', `/api/admin/users/${userId}`);
+        // Rafraîchir la liste après suppression
+        setUsers(users.filter(u => u.id !== userId));
+      } catch (err) {
+        alert("Erreur lors de la suppression.");
+      }
     }
   };
 
@@ -147,7 +160,8 @@ export const AdminMembersPage: React.FC = () => {
             <tr>
               <th className="px-8 py-6">Collaborateur</th>
               <th className="px-8 py-6">Accréditation actuelle</th>
-              <th className="px-8 py-6 text-right">Actions</th>
+              <th className="px-8 py-6 text-center">Role</th>
+              {amISuperAdmin &&  (<th className="px-8 py-6 text-right">Actions</th>)}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -174,6 +188,18 @@ export const AdminMembersPage: React.FC = () => {
                   <td className="px-8 py-6 text-right">
                     <RoleSwitcher u={u} targetRole={targetRole} amISuperAdmin={amISuperAdmin} isTargetSuperAdmin={isTargetSuperAdmin} isSelf={isSelf} canIEdit={canIEdit} />
                   </td>
+                  <td className="px-8 py-6 text-right">
+                  {amISuperAdmin && !isSelf && (
+                    <button 
+                      onClick={() => handleDelete(u.id, u.firstName)}
+                      className="p-2 text-gray-300 hover:text-primary hover:bg-red-50 rounded-xl transition-all"
+                      title="Supprimer le membre"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  )}
+                  </td>
+
                 </tr>
               );
             })}
