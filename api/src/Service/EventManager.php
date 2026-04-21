@@ -88,6 +88,12 @@ class EventManager
             'title' => $event->getTitle(),
             'description' => $event->getDescription(),
             'date' => $event->getDate()->format('c'),
+            'createdBy' => [
+                    'id' => $event->getCreatedBy() ? $event->getCreatedBy()->getId() : null,
+                    'firstName' => $event->getCreatedBy()?->getFirstName(),
+                    'lastName' => $event->getCreatedBy()?->getLastName(),
+                    'role' => $event->getCreatedBy()?->getRoles()[0] ?? 'ROLE_USER' // On prend le 1er rôle
+            ],
             'location' => $event->getLocation(),
             'capacity' => $event->getCapacity(),
             'isPublished' => $event->isPublished(),

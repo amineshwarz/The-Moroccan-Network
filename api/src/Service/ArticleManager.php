@@ -62,6 +62,12 @@ class ArticleManager
             'title' => $article->getTitle(),
             'content' => $article->getContent(),
             'image' => $article->getImage(),
+            'createdBy' => [
+                'id' => $article->getCreatedBy() ? $article->getCreatedBy()->getId() : null,
+                'firstName' => $article->getCreatedBy()?->getFirstName(),
+                'lastName' => $article->getCreatedBy()?->getLastName(),
+                'roles'=> $article->getCreatedBy() ? $article->getCreatedBy()->getRoles() : [],
+            ],
             'slug' => $article->getSlug(),
             'isPublished' => $article->isPublished(),
             'createdAt' => $article->getCreatedAt()->format('d/m/Y'),

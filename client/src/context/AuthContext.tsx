@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Forme de l'utilisateur (on se base sur ce que Symfony renverra)
 interface User {
+  id: number;
   email: string;
   roles: string[];
   firstName: string;

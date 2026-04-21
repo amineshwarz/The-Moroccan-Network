@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAxios } from '../../../hooks/useAxios';
+import { useAuth } from '../../../context/AuthContext'; // Import du contexte Auth
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 // --- IMPORTATION DE TES LABELS CENTRALISÉS ---
 import { CATEGORY_LABELS } from '../../../constants/categories';
@@ -22,6 +23,7 @@ export const AdminEvents: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEventId, setEditingEventId] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const { user } = useAuth(); // RÉCUPÉRATION DU USER
 
   // --- ÉTATS DU FORMULAIRE ---
   const [title, setTitle] = useState('');
@@ -40,6 +42,9 @@ export const AdminEvents: React.FC = () => {
     id,
     label
   }));
+
+  //  LOGIQUE DE PERMISSIONS (Admin total ou Créateur de l'event)
+  const isAdmin = user?.roles?.includes('ROLE_ADMIN') || user?.roles?.includes('ROLE_SUPER_ADMIN');
 
   const fetchEvents = async () => {
     try {
@@ -69,6 +74,10 @@ export const AdminEvents: React.FC = () => {
 
   const handleEdit = (e: React.MouseEvent, event: any) => {
     e.stopPropagation();
+    if (!isAdmin && event.createdBy?.id !== user?.id) {
+      alert("Accès refusé : vous n'êtes pas autorisé à modifier cet événement.");
+      return;
+  }
     setEditingEventId(event.id);
     setTitle(event.title);
     setDescription(event.description);
@@ -102,8 +111,13 @@ export const AdminEvents: React.FC = () => {
     } catch (err) { console.error(err); }
   };
 
-  const handleDelete = async (e: React.MouseEvent, id: number) => {
+  const handleDelete = async (e: React.MouseEvent, id: number, event: any) => {
     e.stopPropagation();
+    //  SÉCURITÉ : Vérification avant suppression
+    if (!isAdmin && event.createdBy?.id !== user?.id) {
+      alert("Action refusée.");
+      return;
+  }
     if (window.confirm("Supprimer cet événement ?")) {
       try {
         await request('DELETE', `/api/events/${id}`);
@@ -155,74 +169,93 @@ export const AdminEvents: React.FC = () => {
       {/* LISTE DYNAMIQUE */}
       <motion.div layout className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>
         <AnimatePresence mode='popLayout'>
-          {events.map((event) => (
-            <motion.div
-              layout
-              key={event.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              whileHover={{ y: -5 }}
-              onClick={() => navigate(`/admin/events/${event.id}/tickets`)}
-              className={`group cursor-pointer bg-white border border-gray-100 overflow-hidden transition-all duration-500 shadow-sm ${
-                viewMode === 'grid' ? 'rounded-[2.5rem] flex flex-col hover:shadow-2xl' : 'rounded-3xl flex flex-row items-center p-4 hover:shadow-lg'
-              }`}
-            >
-              {/* IMAGE CONTAINER */}
-              <div className={`relative overflow-hidden bg-gray-50 shrink-0 ${viewMode === 'grid' ? 'h-56 w-full' : 'h-24 w-24 md:h-32 md:w-32 rounded-2xl'}`}>
-                {event.image ? (
-                  <img src={`http://localhost:8000${event.image}`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-200"><ImageIcon size={viewMode === 'grid' ? 48 : 24} /></div>
-                )}
-                <div className={`absolute top-4 ${viewMode === 'grid' ? 'right-4' : 'left-2'}`}>
-                  <div className="bg-white/90 backdrop-blur-md p-1.5 rounded-lg border border-white/20 shadow-sm">
-                    {event.isPublished ? <Eye size={14} className="text-green-500" /> : <EyeOff size={14} className="text-gray-300" />}
+          {events.map((event) => {
+            const canModify = isAdmin || event.createdBy?.id === user?.id; 
+            return (
+              <motion.div
+                layout
+                key={event.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                whileHover={{ y: -5 }}
+                onClick={() => navigate(`/admin/events/${event.id}/tickets`)}
+                className={`group cursor-pointer bg-white border border-gray-100 overflow-hidden transition-all duration-500 shadow-sm ${
+                  viewMode === 'grid' ? 'rounded-[2.5rem] flex flex-col hover:shadow-2xl' : 'rounded-3xl flex flex-row items-center p-4 hover:shadow-lg'
+                }`}
+              >
+                {/* IMAGE CONTAINER */}
+                <div className={`relative overflow-hidden bg-gray-50 shrink-0 ${viewMode === 'grid' ? 'h-56 w-full' : 'h-24 w-24 md:h-32 md:w-32 rounded-2xl'}`}>
+                  {event.image ? (
+                    <img src={`http://localhost:8000${event.image}`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-200"><ImageIcon size={viewMode === 'grid' ? 48 : 24} /></div>
+                  )}
+                  <div className={`absolute top-4 ${viewMode === 'grid' ? 'right-4' : 'left-2'}`}>
+                    <div className="bg-white/90 backdrop-blur-md p-1.5 rounded-lg border border-white/20 shadow-sm">
+                      {event.isPublished ? <Eye size={14} className="text-green-500" /> : <EyeOff size={14} className="text-gray-300" />}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* CONTENT AREA */}
-              <div className={`flex flex-col flex-1 ${viewMode === 'grid' ? 'p-8' : 'px-6 py-2'}`}>
-                <div className="flex justify-between items-start gap-4">
-                  <h3 className={`font-black text-dark leading-tight uppercase tracking-tighter group-hover:text-primary transition-colors ${viewMode === 'grid' ? 'text-2xl mb-4 italic line-clamp-2' : 'text-lg line-clamp-1'}`}>
-                    {event.title}
-                  </h3>
-                  {viewMode === 'list' && (
-                    <div className="hidden sm:flex items-center gap-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                       <span>{new Date(event.date).toLocaleDateString()}</span>
-                       <span className="flex items-center gap-1 text-primary"><MapPin size={12} /> {event.location}</span>
+                {/* CONTENT AREA */}
+                <div className={`flex flex-col flex-1 ${viewMode === 'grid' ? 'p-8' : 'px-6 py-2'}`}>
+                  <div className="flex justify-between items-start gap-4">
+                    <h3 className={`font-black text-dark leading-tight uppercase tracking-tighter group-hover:text-primary transition-colors ${viewMode === 'grid' ? 'text-2xl mb-4 italic line-clamp-2' : 'text-lg line-clamp-1'}`}>
+                      {event.title}
+                    </h3>
+                    {viewMode === 'list' && (
+                      <div className="hidden sm:flex items-center gap-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                        <span>{new Date(event.date).toLocaleDateString()}</span>
+                        <span className="flex items-center gap-1 text-primary"><MapPin size={12} /> {event.location}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {viewMode === 'grid' && (
+                    <div className="space-y-3 mb-8 flex-1">
+                      <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-2"><CalendarIcon size={12} className="text-primary"/> {new Date(event.date).toLocaleDateString()}</p>
+                      <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-2"><MapPin size={12} className="text-primary"/> {event.location}</p>
+                      <p className="text-gray-500 text-sm line-clamp-2 font-medium leading-relaxed">{event.description}</p>
                     </div>
                   )}
-                </div>
 
-                {viewMode === 'grid' && (
-                  <div className="space-y-3 mb-8 flex-1">
-                    <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-2"><CalendarIcon size={12} className="text-primary"/> {new Date(event.date).toLocaleDateString()}</p>
-                    <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-2"><MapPin size={12} className="text-primary"/> {event.location}</p>
-                    <p className="text-gray-500 text-sm line-clamp-2 font-medium leading-relaxed">{event.description}</p>
+                  <div className={`flex justify-between items-center ${viewMode === 'grid' ? 'pt-6 border-t border-gray-50' : ''}`}>
+                    <div className="flex gap-2">
+                      {canModify && (
+                          <>
+                            <button onClick={(e) => handleEdit(e, event)} className="p-2.5 bg-gray-50 rounded-xl hover:bg-dark hover:text-white transition-all">
+                              <Edit3 size={18} />
+                            </button>
+                            <button onClick={(e) => handleDelete(e, event.id, event)} className="p-2.5 bg-gray-50 rounded-xl hover:bg-primary hover:text-white transition-all">
+                              <Trash2 size={18} />
+                            </button>
+                          </>
+                        )}
+                    </div>
+                    <div className="bg-gray-50 px-3 py-1.5 rounded-full text-[9px] font-black text-dark uppercase tracking-widest border border-dark/5 flex items-center gap-2">
+                      <Users size={12} className="text-primary"/> {event.capacity} PLACES
+                    </div>
+                    <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-dark/5">
+                      <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-[8px] font-black text-white">
+                          {event.createdBy?.firstName[0]}{event.createdBy?.lastName[0]}
+                      </div>
+                      <span className="text-[9px] font-black text-dark uppercase tracking-widest">
+                          {event.createdBy?.firstName}
+                      </span>
                   </div>
-                )}
-
-                <div className={`flex justify-between items-center ${viewMode === 'grid' ? 'pt-6 border-t border-gray-50' : ''}`}>
-                  <div className="flex gap-2">
-                    <button onClick={(e) => handleEdit(e, event)} className="p-2.5 bg-gray-50 rounded-xl hover:bg-dark hover:text-white transition-all"><Edit3 size={18} /></button>
-                    <button onClick={(e) => handleDelete(e, event.id)} className="p-2.5 bg-gray-50 rounded-xl hover:bg-primary hover:text-white transition-all"><Trash2 size={18} /></button>
-                  </div>
-                  <div className="bg-gray-50 px-3 py-1.5 rounded-full text-[9px] font-black text-dark uppercase tracking-widest border border-dark/5 flex items-center gap-2">
-                    <Users size={12} className="text-primary"/> {event.capacity} PLACES
                   </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
         </AnimatePresence>
       </motion.div>
 
       {/* --- MODAL GLASSMORPHISM --- */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsModalOpen(false)} className="absolute inset-0 bg-dark/60 backdrop-blur-md" />
             <motion.div 
               initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
@@ -303,7 +336,7 @@ export const AdminEvents: React.FC = () => {
                     <input type="checkbox" id="pub" checked={isPublished} onChange={e => setIsPublished(e.target.checked)} className="w-6 h-6 accent-primary rounded-xl cursor-pointer" />
                     <label htmlFor="pub" className="text-xs font-black text-dark uppercase tracking-tighter cursor-pointer">Mettre en ligne</label>
                   </div>
-                  <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="bg-dark text-white px-10 py-5 rounded-[2rem] font-black text-lg hover:bg-primary transition-all shadow-2xl flex items-center justify-center gap-3 disabled:opacity-50">
+                  <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="bg-dark text-white px-10 py-5 rounded-2rem font-black text-lg hover:bg-primary transition-all shadow-2xl flex items-center justify-center gap-3 disabled:opacity-50">
                     {loading ? <Loader2 className="animate-spin" /> : <Save size={22} />}
                     <span>{editingEventId ? 'ENREGISTRER' : 'CRÉER L\'EVENT'}</span>
                   </motion.button>
