@@ -161,7 +161,7 @@ export const AdminMembersPage: React.FC = () => {
               <th className="px-8 py-6">Collaborateur</th>
               <th className="px-8 py-6">Accréditation actuelle</th>
               <th className="px-8 py-6 text-center">Role</th>
-              {amISuperAdmin &&  (<th className="px-8 py-6 text-right">Actions</th>)}
+              <th className="px-8 py-6 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -189,15 +189,21 @@ export const AdminMembersPage: React.FC = () => {
                     <RoleSwitcher u={u} targetRole={targetRole} amISuperAdmin={amISuperAdmin} isTargetSuperAdmin={isTargetSuperAdmin} isSelf={isSelf} canIEdit={canIEdit} />
                   </td>
                   <td className="px-8 py-6 text-right">
-                  {amISuperAdmin && !isSelf && (
-                    <button 
-                      onClick={() => handleDelete(u.id, u.firstName)}
-                      className="p-2 text-gray-300 hover:text-primary hover:bg-red-50 rounded-xl transition-all"
-                      title="Supprimer le membre"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  )}
+                    <div className="flex justify-end items-center gap-2">
+                      {amISuperAdmin && !isSelf ? (
+                        <motion.button 
+                          whileHover={{ scale: 1.1 }}
+                          onClick={() => handleDelete(u.id, u.firstName)}
+                          className="p-2 text-gray-300 hover:text-primary transition-all"
+                        >
+                          <Trash2 size={18} />
+                        </motion.button>
+                      ) : (
+                        <div className="text-gray-200 items-center" title="Accès limité">
+                          <Lock size={16} />
+                        </div>
+                      )}
+                    </div>
                   </td>
 
                 </tr>
