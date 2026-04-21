@@ -51,7 +51,7 @@ export const AdminLayout: React.FC = () => {
             className={`flex items-center gap-4 px-8 py-4 transition-all duration-300 border-l-4 ${
               location.pathname === link.path 
                 ? 'bg-primary/10 border-primary text-white font-bold' 
-                : 'border-transparent text-gray-500 hover:text-white hover:bg-white/5'
+                : 'border-transparent  text-white hover:text-gray-500 hover:bg-white/5'
             }`}
           >
             {link.icon}
@@ -70,7 +70,7 @@ export const AdminLayout: React.FC = () => {
                 className={`flex items-center gap-4 px-8 py-4 transition-all duration-300 border-l-4 ${
                   location.pathname === link.path 
                     ? 'bg-primary text-white border-white' 
-                    : 'border-transparent text-gray-500 hover:text-primary hover:bg-white/5'
+                    : 'border-transparent  text-white hover:text-gray-500 hover:bg-white/5'
                 }`}
               >
                 {link.icon}
