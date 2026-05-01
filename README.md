@@ -1,16 +1,16 @@
-# 🌐 The Moroccan Network - Plateforme de Gestion
+#  The Moroccan Network - Plateforme de Gestion
 
 Bienvenue sur le dépôt officiel de la plateforme de gestion pour l'association **The Moroccan Network**. 
 Cette application permet la gestion des adhérents (HelloAsso), la billetterie événementielle, la presse (actualités) et le suivi administratif.
 
-## 🛠 Stack Technique
+##  Stack Technique
 - **Backend** : Symfony 7 / PHP 8.4
 - **Frontend** : React 19 / TypeScript / Vite / TailwindCSS v4
 - **Base de données** : MySQL 8.0
 - **Sécurité** : JWT (LexikJWTAuthenticationBundle)
 - **Déploiement** : CI/CD via GitHub Actions
 
-## 🚀 Installation & Développement
+##  Installation & Développement
 
 ### 1. Prérequis
 - PHP 8.4 & Composer
@@ -34,13 +34,13 @@ Cette application permet la gestion des adhérents (HelloAsso), la billetterie �
 3. Créer le fichier `.env.local` et définir `VITE_API_URL=http://localhost:8000`
 4. Lancer le serveur : `npm run dev`
 
-## 🔐 Sécurité & Rôles
+##  Sécurité & Rôles
 Le système repose sur 3 niveaux d'accès :
 - **ROLE_USER** : Membres du bureau (Logistique événementielle, rédaction news).
 - **ROLE_ADMIN** : Bras droit du président (Gestion staff, outils de communication).
 - **ROLE_SUPER_ADMIN** : Président (Accès total, gestion des rôles et invitations).
 
-## 🚀 Déploiement (Production)
+##  Déploiement (Production)
 Pour préparer le déploiement sur un serveur Nginx/Apache :
 1. **Frontend** : Lancer `npm run build` pour générer les assets statiques dans `/dist`.
 2. **Backend** : 
@@ -49,5 +49,5 @@ Pour préparer le déploiement sur un serveur Nginx/Apache :
    - Utiliser `php bin/console cache:warmup`.
    - Configurer les headers de sécurité (HSTS, CSP) via Nginx.
 
-## 🧪 Tests
+##  Tests
 - Lancer les tests unitaires et fonctionnels avec : `php bin/phpunit`
