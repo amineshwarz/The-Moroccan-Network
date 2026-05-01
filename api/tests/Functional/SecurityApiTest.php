@@ -17,4 +17,5 @@ class SecurityApiTest extends WebTestCase
         // On affirme (assert) que Symfony doit nous bloquer (Erreur 401)
         $this->assertResponseStatusCodeSame(401);
     }
+    
 }

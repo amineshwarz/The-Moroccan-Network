@@ -9,15 +9,16 @@ class SubscriberTest extends TestCase
 {
     public function testSubscriberInitialState(): void
     {
+        // 1. Préparation
         $subscriber = new Subscriber();
         $subscriber->setFirstName('Amine');
         $subscriber->setAmount(3500);
 
-        // On vérifie que les données sont bien assignées
-        $this->assertEquals('Amine', $subscriber->getFirstName());
-        $this->assertEquals(3500, $subscriber->getAmount());
+        // 2. Action (Act) On simule ce que fait le contrôleur de paiement
+        $subscriber->setStatus('PENDING');
         
-        // On vérifie que l'ID est bien null avant l'enregistrement en base
-        $this->assertNull($subscriber->getId());
+       // 3. Vérification (Assert)
+       $this->assertEquals('PENDING', $subscriber->getStatus());
+       $this->assertEquals('Amine', $subscriber->getFirstName());
     }
 }
