@@ -1,4 +1,5 @@
 nelmio_cors:
+    # 1. DEFAULTS — Règles appliquées à TOUTES les routes
     defaults:
         origin_regex: true
         allow_origin: ['%env(CORS_ALLOW_ORIGIN)%']
@@ -7,6 +8,8 @@ nelmio_cors:
         allow_credentials: true 
         expose_headers: ['Link']
         max_age: 3600
+        
+    # 2. PATHS — Règles spécifiques par chemin d'URL
     paths:
         '^/api/':
             allow_origin: ['%env(CORS_ALLOW_ORIGIN)%']

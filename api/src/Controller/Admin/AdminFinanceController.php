@@ -20,7 +20,7 @@ class AdminFinanceController extends AbstractController
         $memberships = $subRepo->findBy(['status' => 'ACTIVE']);
         $membersData = array_map(fn($s) => [
             'id' => 'SUB-' . $s->getId(),
-            'date' => 'Février 2024', // Idéalement, utilise un champ createdAt
+            'date' => 'Février 2024', //  utilise un champ createdAt
             'label' => "Adhésion Annuelle : " . $s->getFirstName() . " " . $s->getLastName(),
             'category' => 'ADHESION',
             'amount' => $s->getAmount() / 100,

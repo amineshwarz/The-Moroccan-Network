@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-// 1. IMPORTATION CORRIGÉE : On utilise "Attribute" au lieu de "Annotation"
 use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -13,7 +12,7 @@ class SecurityController extends AbstractController
     #[Route('/api/login', name: 'api_login', methods: ['POST'])]
     public function login(): JsonResponse
     {
-        // 2. RÉCUPÉRATION DE L'UTILISATEUR
+        // 1. RÉCUPÉRATION DE L'UTILISATEUR
         $user = $this->getUser();
 
         // Si aucun utilisateur n'est connecté (ne devrait pas arriver avec json_login bien configuré)

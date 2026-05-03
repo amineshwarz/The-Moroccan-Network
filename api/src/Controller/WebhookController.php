@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Repository\SubscriberRepository;
 use App\Repository\TicketRepository; 
-use App\Service\MailService; // On importe le nouveau service de mail
+use App\Service\MailService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,30 +21,30 @@ class WebhookController extends AbstractController
         EntityManagerInterface $em,
         MailService $mailService // On injecte le service de mail ici
     ): Response {
-        
+    // ----------------------------------ÉTAPE 1 — Lire le JSON envoyé par HelloAsso    
         try {
-            // 1. On récupère les données JSON envoyées par HelloAsso
             $payload = $request->toArray();
         } catch (\Exception $e) {
             return new Response('Invalid JSON', 400);
         }
 
-        // 2. On extrait les metadata (où on a caché nos IDs internes)
+    // ----------------------------------ÉTAPE 2 — Extraire les métadonnées (le lien avec la BDD)   
+    
         $metadata = $payload['metadata'] ?? [];
         
         // On récupère les deux IDs possibles (l'un sera null selon le type de paiement)
         $subscriberId = $metadata['subscriber_id'] ?? null;
         $ticketId = $metadata['ticket_id'] ?? null;
 
-        // 3. On ne traite l'activation que si l'événement est une commande validée ('Order')
-        if (isset($payload['eventType']) && $payload['eventType'] === 'Order') {
+    // ----------------------------------ÉTAPE 3 — On ne traite l'activation que si l'événement est une commande validée ('Order')        
+        if (isset($payload['eventType']) && $payload['eventType'] === 'Order') { // On entre UNIQUEMENT si c'est un 'Order'
             
-            // --- CAS A : C'EST UNE ADHÉSION ANNUELLE ---
+        // --- CAS A : C'EST UNE ADHÉSION ANNUELLE ---
             if ($subscriberId) {
                 $subscriber = $subscriberRepository->find((int)$subscriberId);
 
-                // CHANGEMENT : On vérifie que le statut n'est PAS déjà ACTIVE
-                // Pourquoi ? Pour éviter d'envoyer 2 fois le mail si HelloAsso renvoie le webhook
+                // l'idempotence: DOUBLE VÉRIFICATION : getStatus() !== 'ACTIVE'
+                // Pourquoi ? HelloAsso peut envoyer le MÊME webhook plusieurs fois
                 if ($subscriber && $subscriber->getStatus() !== 'ACTIVE') {
                     // On passe le statut en ACTIVE
                     $subscriber->setStatus('ACTIVE');
@@ -55,21 +55,20 @@ class WebhookController extends AbstractController
 
                     $em->flush();
                     
-                    // --- NOUVEAU : ENVOI DU MAIL DE CONFIRMATION D'ADHÉSION ---
-                    // On appelle la méthode de notre service pour envoyer le mail Twig
+                    // ENVOI DU MAIL DE CONFIRMATION D'ADHÉSION
                     $mailService->sendMembershipConfirmation($subscriber);
-                    
+
+                    // --- Log de debug dans webhooksuccess.log 
                     file_put_contents('webhook_success.log', "[" . date('Y-m-d H:i:s') . "] Adhérent $subscriberId activé et mail envoyé.\n", FILE_APPEND);
                 }
             }
 
-            // --- CAS B : C'EST UN TICKET POUR UN ÉVÉNEMENT ---
+        // --- CAS B : C'EST UN TICKET POUR UN ÉVÉNEMENT ---
             if ($ticketId) {
                 $ticket = $ticketRepository->find((int)$ticketId);
 
-                // CHANGEMENT : On vérifie ici aussi que le statut n'est PAS déjà ACTIVE
                 if ($ticket && $ticket->getStatus() !== 'ACTIVE') {
-                    // On active le ticket pour qu'il soit valide à l'entrée
+                    
                     $ticket->setStatus('ACTIVE');
                     
                     // On stocke l'ID HelloAsso sur le ticket
@@ -80,17 +79,17 @@ class WebhookController extends AbstractController
 
                     $em->flush();
 
-                    // --- NOUVEAU : ENVOI DU BILLET PAR EMAIL ---
-                    // On envoie le mail avec les détails de l'événement (date, lieu, etc.)
+                    // --- ENVOI DU BILLET PAR EMAIL
                     $mailService->sendTicketConfirmation($ticket);
-                    
+
+                    // --- Log de debug dans webhooksuccess.log 
                     file_put_contents('webhook_success.log', "[" . date('Y-m-d H:i:s') . "] Ticket $ticketId activé et mail envoyé.\n", FILE_APPEND);
                 }
             }
         }
 
-        // 4. RÉPONSE OBLIGATOIRE : Toujours répondre 200 à HelloAsso.
+    // ----------------------------------ÉTAPE 4 — RÉPONSE OBLIGATOIRE 200 OK 
         // Si tu renvoies une erreur, ils retenteront l'appel 50 fois.
-        return new Response('Webhook processed successfully', 200);
+        return new Response('Webhook processed successfully', 200); // Le 200 dit à HelloAsso : "J'ai bien reçu, merci, ne réessaie pas"
     }
 }

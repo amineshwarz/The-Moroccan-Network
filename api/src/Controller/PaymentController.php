@@ -16,6 +16,8 @@ use App\Entity\Ticket;
 #[Route('/api/payment', name: 'api_payment_')]
 class PaymentController extends AbstractController
 {
+// ---------ROUTE 1 : Initier un PAIEMENT D'ADHÉSION----------
+
     #[Route('/membership', name: 'membership', methods: ['POST'])]
     public function initiate(Request $request, HelloAssoService $helloAsso, EntityManagerInterface $em): JsonResponse
     {
@@ -35,28 +37,29 @@ class PaymentController extends AbstractController
         $em->flush(); 
 
         // 3. Préparer l'appel à HelloAsso
-        // Remplace par ton adresse Ngrok actuelle pour les tests
-        $baseUrl = 'https://exie-nonadjustable-overfastidiously.ngrok-free.dev'; 
+        $baseUrl = 'https://exie-nonadjustable-overfastidiously.ngrok-free.dev'; //  URL Ngrok = tunnel temporaire pour exposer mon localhost sur internet
 
         $body = [
             'totalAmount' => (int)$data['amount'],
             'initialAmount' => (int)$data['amount'],
             'itemName' => "Adhésion Annuelle ({$data['type']}) - The Moroccan Network",
             'backUrl' => $baseUrl . '/adhesion', // Retourne à la page adhésion si annule
-            'returnUrl' => $baseUrl . '/api/payment/success?type=membership', // On peut ajouter un paramètre pour différencier les types de paiement
+            'returnUrl' => $baseUrl . '/api/payment/success?type=membership', // Le ?type=membership permet de savoir quel type de paiement c'était
             'errorUrl' => $baseUrl . '/api/payment/error',
             'containsDonation' => false,
-            // --- AJOUT ICI : PRE-REMPLISSAGE HELLOASSO ---
+             // PRÉ-REMPLISSAGE DU FORMULAIRE HELLOASSO
             'payer' => [
                 'firstName' => $data['firstName'],
                 'lastName' => $data['lastName'],
                 'email' => $data['email'],
             ],
             'metadata' => [
-                'subscriber_id' => (string) $subscriber->getId() // Crucial pour le Webhook
+                'subscriber_id' => (string) $subscriber->getId() // C'est le lien entre HelloAsso et ma BDD ! Quand HelloAsso enverra le webhook de confirmation,
+                // on récupérera cet ID pour retrouver et activer l'adhérent en BDD
             ]
         ];
 
+        // 4. Appeler HelloAsso pour créer un checkout
         try {
             $checkoutData = $helloAsso->createCheckoutIntent($body);
             
@@ -68,6 +71,8 @@ class PaymentController extends AbstractController
         }
     }
 
+// ------------------ ROUTE 2 : Redirection après SUCCÈS du paiement HelloAsso
+
     #[Route('/success', name: 'success', methods: ['GET'])]
     public function success(Request $request): Response
     {
@@ -78,15 +83,15 @@ class PaymentController extends AbstractController
         return $this->redirect('http://localhost:5173/payment/success?type=' . $type);
     }
 
+// ------------------ ROUTE 3 : Redirection après ERREUR ou ANNULATION du paiement
     #[Route('/error', name: 'error', methods: ['GET'])]
     public function error(): Response
     {
         return $this->redirect('http://localhost:5173/payment/cancel');
     }
 
-    /**
-     * Route pour initier l'achat d'un ticket pour un événement précis
-     */
+    
+// ------------------- ROUTE 4 : Initier un PAIEMENT DE BILLET D'ÉVÉNEMENT
     #[Route('/event/{id}/ticket', name: 'event_ticket_payment', methods: ['POST'])]
     public function initiateTicket(
         Event $event, 
@@ -101,9 +106,8 @@ class PaymentController extends AbstractController
                 return $this->json(['error' => 'Données de formulaire invalides'], 400);
             }
 
-            // 1. Création du Ticket
+            // 1 — Créer le ticket en BDD avec statut PENDING
             $ticket = new Ticket();
-            // Utilisation de l'opérateur ?? pour garantir qu'aucune valeur n'est NULL
             $ticket->setFirstName($data['firstName'] ?? 'Inconnu');
             $ticket->setLastName($data['lastName'] ?? 'Inconnu');
             $ticket->setEmail($data['email'] ?? '');
@@ -115,8 +119,7 @@ class PaymentController extends AbstractController
             $em->persist($ticket);
             $em->flush();
 
-            // 2. Préparation du Body pour HelloAsso
-            // ATTENTION : Vérifie que ton adresse NGROK est toujours la bonne !
+            // 2 — Construire le body pour HelloAsso
             $baseUrl = 'https://exie-nonadjustable-overfastidiously.ngrok-free.dev'; 
 
             $body = [
@@ -124,7 +127,7 @@ class PaymentController extends AbstractController
                 'initialAmount' => (int)$data['amount'],
                 'itemName' => "Billet : " . $event->getTitle() . " [" . ($data['category'] ?? 'ST') . "]",
                 'backUrl' => $baseUrl . '/evenements/' . $event->getId(), 
-                'returnUrl' => $baseUrl . '/api/payment/success?type=ticket', // Ajout du paramètre type
+                'returnUrl' => $baseUrl . '/api/payment/success?type=ticket', 
                 'errorUrl' => $baseUrl . '/api/payment/error',
                 'containsDonation' => false,
                 'payer' => [
@@ -137,7 +140,7 @@ class PaymentController extends AbstractController
                 ]
             ];
 
-            // 3. Appel au service HelloAsso
+            // 3 — Appel HelloAsso
             $checkoutData = $helloAsso->createCheckoutIntent($body);
             
             return $this->json(['redirectUrl' => $checkoutData['redirectUrl']]);

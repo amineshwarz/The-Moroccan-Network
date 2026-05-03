@@ -21,12 +21,12 @@ class ArticleManager
      */
     public function save(Article $article, array $data, ?UploadedFile $imageFile,  User $author): Article
     {
-        // Si c'est une création, on lie l'auteur
+    // ÉTAPE 1 — Lier l'auteur (CRÉATION seulement)
         if ($article->getId() === null) {
             $article->setCreatedBy($author);
             $article->setCreatedAt(new \DateTimeImmutable());
         }
-
+    // ÉTAPE 2 — Hydration des champs texte
         $article->setTitle($data['title'] ?? 'Sans titre');
         $article->setContent($data['content'] ?? '');
         $article->setIsPublished($data['isPublished'] === '1' || $data['isPublished'] === true);
@@ -36,10 +36,10 @@ class ArticleManager
         //     $article->setCreatedAt(new \DateTimeImmutable());
         // }
 
-        // Génération du Slug (ex: "Bienvenue à tous" -> "bienvenue-a-tous")
+    // ÉTAPE 3 — Génération du SLUG (ex: "Bienvenue à tous" -> "bienvenue-a-tous")
         $article->setSlug($this->slugger->slug($article->getTitle())->lower());
 
-        // Gestion de l'image (identique aux events)
+    // ÉTAPE 4 — Gestion de l'image  (identique aux events)
         if ($imageFile) {
             $newFilename = uniqid().'.'.$imageFile->guessExtension();
             $imageFile->move($this->imagesDirectory . '/news', $newFilename);

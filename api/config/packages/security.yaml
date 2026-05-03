@@ -3,7 +3,7 @@ security:
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
 
-    # Source des utilisateurs (ta table MySQL 'user')
+    # Définit où Symfony va chercher les utilisateurs pour les authentifier
     providers:
         app_user_provider:
             entity:
@@ -12,27 +12,29 @@ security:
 
     # Hiérarchie : L'Admin possède par défaut tous les droits du Bureau
     role_hierarchy:
-        ROLE_SUPER_ADMIN: ROLE_ADMIN # Le Président (Super Admin) a les droits du Bras Droit (Admin) + du Staff
-        ROLE_ADMIN: ROLE_USER # Le Bras Droit (Admin) a les droits du Staff (User)
-
+        ROLE_SUPER_ADMIN: ROLE_ADMIN    # ---Le Président (Super Admin) a les droits du Bras Droit (Admin) + du Staff
+        ROLE_ADMIN: ROLE_USER           # ---Le Bras Droit (Admin) a les droits du Staff (User)
+    
+    # Firewall : Définit les règles de sécurité pour les différentes parties de l'application
     firewalls:
         dev:
             pattern: ^/(_profiler|_wdt|assets|build)/
             security: false
             
-        # --- AJOUTE CE BLOC AVANT LE BLOC MAIN ---
+        # --- Le Webhook HelloAsso (public) ---
         webhook:
             pattern: ^/api/webhook/helloasso
             stateless: true
-            security: false # On désactive la sécurité pour cette route précise, car HelloAsso ne peut pas gérer les jetons JWT. C'est un webhook public qui reçoit des notifications de HelloAsso, donc il doit être accessible sans authentification.
+            security: false # ---On désactive la sécurité pour cette route précise, car HelloAsso ne peut pas gérer les jetons JWT. C'est un webhook public qui reçoit des notifications de HelloAsso, donc il doit être accessible sans authentification.
 
-            
-        membership_check:
-            pattern: ^/api/membership/check
+        # --- Vérification adhésion (public) ---    
+        membership_check:  
+            pattern: ^/api/membership/check # -- Route publique qui vérifie si une personne est adhérente
             stateless: true
             security: false
-        # 1. PARE-FEU POUR LE LOGIN (Génération du jeton)
-        # On intercepte les requêtes sur /api/login pour créer le JWT
+
+
+        # ---  Le Login (génère le JWT) ---
         login:
             pattern: ^/api/login
             stateless: true # Mode pro : le serveur ne stocke aucune session
@@ -40,29 +42,27 @@ security:
                 check_path: api_login
                 username_path: email
                 password_path: password
-                # Ces gestionnaires de Lexik renvoient le JSON {"token": "..."} automatiquement
-                success_handler: lexik_jwt_authentication.handler.authentication_success
-                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+                success_handler: lexik_jwt_authentication.handler.authentication_success    # Si email + password OK → LexikJWT génère et renvoie un token JWT
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure    # Si email ou password incorrect → renvoie 401 Unauthorized
 
-        # 2. PARE-FEU PRINCIPAL (Vérification du jeton)
-        # Toutes les autres requêtes passant par /api seront vérifiées
+        # --- Toutes les autres routes /api/* ---
         main:
             pattern: ^/api
-            stateless: true # Indispensable pour le mode JWT
-            jwt: ~ # Active la lecture du jeton "Authorization: Bearer <token>"
+            stateless: true         # Indispensable pour le mode JWT
+            jwt: ~                  # Active la lecture du jeton "Authorization: Bearer <token>"
 
-    # 3. CONTRÔLE D'ACCÈS (Tes règles métier)
+    # CONTRÔLE D'ACCÈS (Régles d'accés par URL)
     access_control:
-        # La route de login doit être publique pour pouvoir se connecter !
+        # --- Routes publiques (sans token JWT)
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/membership/check, roles: PUBLIC_ACCESS }
 
-        # Seul l'ADMIN peut voir les adhérents HelloAsso et gérer les invitations
-        - { path: ^/api/admin/subscribers, roles: ROLE_ADMIN }
+        # ---Routes réservées à l'ADMIN (Bras Droit + Président)
+        - { path: ^/api/admin/subscribers, roles: ROLE_ADMIN }  
         - { path: ^/api/admin/invitations, roles: ROLE_ADMIN }
         - { path: ^/api/admin/users, roles: ROLE_ADMIN } 
         
-        # Le reste de l'admin est accessible au BUREAU (ROLE_USER) et à l'ADMIN
+        # --- Reste de l'admin → ROLE_USER (tout le bureau)
         - { path: ^/api/admin, roles: ROLE_USER }
 
 when@test:

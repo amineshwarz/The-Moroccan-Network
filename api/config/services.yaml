@@ -19,8 +19,7 @@ services:
         # dans un constructeur, donne-lui la valeur du paramètre images_directory défini plus haut."
         bind:
             $imagesDirectory: '%kernel.project_dir%/public/uploads/events'
-            # Dès qu'un constructeur demande une variable nommée $clientId, 
-            # Symfony injecte la valeur HELLOASSO_CLIENT_ID de ton fichier .env
+            # Dès qu'un constructeur demande une variable nommée $clientId, Symfony injecte la valeur HELLOASSO_CLIENT_ID de le fichier .env
             $clientId: '%env(HELLOASSO_CLIENT_ID)%'
             $clientSecret: '%env(HELLOASSO_CLIENT_SECRET)%'
             $orgSlug: '%env(HELLOASSO_SLUG)%'
