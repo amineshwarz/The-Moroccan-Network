@@ -4,7 +4,7 @@ Bienvenue sur le dépôt officiel de la plateforme de gestion pour l'association
 Cette application permet la gestion des adhérents (HelloAsso), la billetterie événementielle, la presse (actualités) et le suivi administratif.
 
 ##  Stack Technique
-- **Backend** : Symfony 7 / PHP 8.4
+- **Backend** : Symfony 8 / PHP 8.4
 - **Frontend** : React 19 / TypeScript / Vite / TailwindCSS v4
 - **Base de données** : MySQL 8.0
 - **Sécurité** : JWT (LexikJWTAuthenticationBundle)

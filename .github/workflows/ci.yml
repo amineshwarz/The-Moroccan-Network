@@ -1,0 +1,29 @@
+name: CI The Moroccan Network
+
+on:
+  push:
+    branches: [ "main" ] # À chaque git push sur la branche principale
+
+jobs:
+  tests-backend:
+    runs-on: ubuntu-latest #Création d'un environnement serveur vierge (Ubuntu)
+    defaults:
+      run:
+        working-directory: ./api #  le nom du dossier Symfony
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configuration de PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4' #  version de PHP
+      # Installation automatique de PHP 8 et des dépendances (Composer)
+      - name: Installation des dépendances 
+        run: composer install --no-progress
+
+      - name: Lancement des tests PHPUnit # Exécution automatique des tests PHPUnit
+        run: php bin/phpunit
+
+
+        
