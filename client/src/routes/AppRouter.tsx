@@ -19,7 +19,7 @@ import {
   AboutPage,
 } from '../pages/public';
 
-// --- NOUVEAUX IMPORTS : STATUS DE PAIEMENT ---
+// ---  STATUS DE PAIEMENT (redirection apres le paiment) ---
 import { SuccessPage } from '../pages/public/PaymentStatus/SuccessPage';
 import { CancelPage } from '../pages/public/PaymentStatus/CancelPage';
 
@@ -39,19 +39,20 @@ import {
 
 // --- COMPOSANT DE PROTECTION (AUTH GUARD) ---
 const AuthGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
+
   const { user, loading } = useAuth();
 
-  // On attend que le context ait fini de charger (lecture du localStorage)
+// On attend que le context ait fini de charger (lecture du localStorage)
   if (loading) {
     return <div className="h-screen flex items-center justify-center text-primary font-bold animate-pulse text-2xl uppercase tracking-widest italic">The Moroccan Network...</div>;
   }
 
-  // Redirection vers l'accueil public si l'utilisateur n'est pas connecté
+// Redirection vers l'accueil public si l'utilisateur n'est pas connecté
   if (!user) {
     return <Navigate to="/" replace />;
   }
 
-  // Sécurité : On vérifie si l'utilisateur a au moins UN des rôles autorisés.
+// Sécurité : On vérifie si l'utilisateur a au moins UN des rôles autorisés.
   // Utilisation de l'optional chaining (?.) pour éviter les crashs si l'objet user est mal formé.
   const hasAccess = user?.roles && allowedRoles.some(role => user.roles.includes(role));
 
@@ -67,7 +68,7 @@ const AuthGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
 const AppRouter: React.FC = () => {
   return useRoutes([
     {
-      // --- 1. ROUTES PUBLIQUES (Ouvertes à tous les visiteurs) ---
+  // --- 1. ROUTES PUBLIQUES (Ouvertes à tous les visiteurs) ---
       path: '/',
       element: <PublicLayout />,
       children: [
@@ -83,19 +84,19 @@ const AppRouter: React.FC = () => {
         { path: 'forgot-password', element: <ForgotPasswordPage /> },
         
         // --- ROUTES DE RETOUR HELLOASSO ---
-        // Ces routes doivent correspondre aux URLs envoyées dans ton PaymentController Symfony
+        // Ces routes doivent correspondre aux URLs envoyées dans  PaymentController.php (success_url et cancel_url)
         { path: 'payment/success', element: <SuccessPage /> },
         { path: 'payment/cancel', element: <CancelPage /> },
       ],
     },
     {
-      // --- 2. ROUTES D'ACCÈS ADMIN/BUREAU ---
+  // --- 2. ROUTES D'ACCÈS ADMIN/BUREAU ---
       path: '/admin',
       children: [
-        // Page de login (toujours accessible pour se connecter)
+      // Page de login (toujours accessible pour se connecter)
         { index: true, element: <AdminLoginPage /> },
 
-        // --- ZONE STAFF / BUREAU (Rôles : Bureau, Bras Droit, Président) ---
+      // --- ZONE STAFF / BUREAU (Rôles : BUREAU, Bras Droit, Président) ---
         {
           element: <AuthGuard allowedRoles={['ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN']} />,
           children: [
@@ -114,7 +115,7 @@ const AppRouter: React.FC = () => {
           ],
         },
 
-        // --- ZONE ADMINISTRATION SUPRÊME (Rôles : Bras Droit et Président uniquement) ---
+      // --- ZONE ADMINISTRATION SUPRÊME (Rôles : Bras Droit et Président uniquement) ---
         {
           element: <AuthGuard allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN']} />,
           children: [

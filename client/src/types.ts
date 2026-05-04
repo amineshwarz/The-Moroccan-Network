@@ -1,3 +1,4 @@
+// Un membre du staff (table user en BDD)
 export interface Member {
   id: string;
   firstName: string;
@@ -8,6 +9,7 @@ export interface Member {
   plan: string;
 }
 
+// Un événement
 export interface Event {
   id: string;
   title: string;
@@ -16,9 +18,10 @@ export interface Event {
   ticketsSold: number;
   capacity: number;
   description: string;
-  image?: string;
+  image?: string; // ← optionnel (le ? = peut être absent)
 }
 
+// Un article de news
 export interface NewsItem {
   id: string;
   title: string;
@@ -27,8 +30,11 @@ export interface NewsItem {
   category: string;
 }
 
+// Un lien de navigation (navbar, sidebar)
 export interface NavItem {
   label: string;
   path: string;
-  icon?: React.ReactNode;
+  icon?: React.ReactNode; // ← optionnel, icône JSX
 }
+
+// a rajouter d'autre interface pour centraliser tout les types utilisés dans l'app 
