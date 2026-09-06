@@ -31,7 +31,8 @@ class ResetPasswordController extends AbstractController
             $em->flush();
 
             // Envoi du mail (comme pour l'invitation)
-            $link = "http://localhost:5173/forgot-password?token=" . $token;
+            $link = $_ENV['APP_FRONT_URL'] . "/forgot-password?token=" . $token;
+            // $link = "http://localhost:5173/forgot-password?token=" . $token;
             $email = (new Email())
                 ->from('bureau@moroccan4life.org')
                 ->to($user->getEmail())

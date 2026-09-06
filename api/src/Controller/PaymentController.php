@@ -80,14 +80,18 @@ class PaymentController extends AbstractController
         $type = $request->query->get('type', 'default');
     
         // On renvoie l'utilisateur vers React en gardant ce paramètre
-        return $this->redirect('http://localhost:5173/payment/success?type=' . $type);
+        $frontUrl = $_ENV['APP_FRONT_URL'];
+        return $this->redirect($frontUrl . '/payment/success?type=' . $type);
+        //return $this->redirect('http://localhost:5173/payment/success?type=' . $type);
     }
 
 // ------------------ ROUTE 3 : Redirection après ERREUR ou ANNULATION du paiement
     #[Route('/error', name: 'error', methods: ['GET'])]
     public function error(): Response
     {
-        return $this->redirect('http://localhost:5173/payment/cancel');
+        $frontUrl = $_ENV['APP_FRONT_URL'];
+        return $this->redirect($frontUrl . '/payment/cancel');
+        // return $this->redirect('http://localhost:5173/payment/cancel');
     }
 
     

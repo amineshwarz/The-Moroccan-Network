@@ -44,7 +44,8 @@ class InvitationController extends AbstractController
         $em->persist($invitation);
         $em->flush(); 
 
-        $link = "http://localhost:5173/register?token=" . $token;
+        $link = $_ENV['APP_FRONT_URL'] . "/register?token=" . $token;
+        // $link = "http://localhost:5173/register?token=" . $token;
 
         // 2. Délégation : On demande au service d'envoyer le mail
         try {
