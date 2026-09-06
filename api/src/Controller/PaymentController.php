@@ -25,16 +25,24 @@ class PaymentController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         // 2. Créer l'adhérent en base de données avec le statut 'PENDING'
-        $subscriber = new Subscriber();
-        $subscriber->setFirstName($data['firstName']);
-        $subscriber->setLastName($data['lastName']);
-        $subscriber->setEmail($data['email']);
-        $subscriber->setType($data['type']); // 'NORMAL' ou 'STUDENT'
-        $subscriber->setAmount((int)$data['amount']); // ex: 3000 pour 30€
-        $subscriber->setStatus('PENDING'); 
-
-        $em->persist($subscriber);
-        $em->flush(); 
+        if (!$data || !isset($data['firstName'], $data['lastName'], $data['email'], $data['amount'])) {
+            return $this->json(['error' => 'Données du formulaire incomplètes.'], 400);
+        }
+    
+        try {
+            $subscriber = new Subscriber();
+            $subscriber->setFirstName($data['firstName']);
+            $subscriber->setLastName($data['lastName']);
+            $subscriber->setEmail($data['email']);
+            $subscriber->setType($data['type']);
+            $subscriber->setAmount((int)$data['amount']);
+            $subscriber->setStatus('PENDING');
+    
+            $em->persist($subscriber);
+            $em->flush();
+        } catch (\Exception $e) {
+            return $this->json(['error' => 'Impossible d\'enregistrer votre adhésion. Réessayez.'], 500);
+        }
 
         // 3. Préparer l'appel à HelloAsso
         $baseUrl = 'https://exie-nonadjustable-overfastidiously.ngrok-free.dev'; //  URL Ngrok = tunnel temporaire pour exposer mon localhost sur internet
@@ -67,7 +75,10 @@ class PaymentController extends AbstractController
                 'redirectUrl' => $checkoutData['redirectUrl']
             ]);
         } catch (\Exception $e) {
-            return $this->json(['error' => $e->getMessage()], 500);
+            // return $this->json(['error' => $e->getMessage()], 500);
+            return $this->json([
+                'error' => 'Le service de paiement HelloAsso est temporairement indisponible. Veuillez réessayer dans quelques instants.'
+            ], 503);
         }
     }
 
