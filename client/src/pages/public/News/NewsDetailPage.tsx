@@ -60,7 +60,7 @@ export const NewsDetailPage: React.FC = () => {
 
           <div className="w-full h-350px md:h-550px overflow-hidden grayscale">
              <img 
-               src={article.image ? `http://localhost:8000${article.image}` : '/placeholder.jpg'} 
+               src={article.image ? `${import.meta.env.VITE_API_URL_BASE}${article.image}` : '/placeholder.jpg'} 
                className="w-full h-full object-cover"
                alt=""
              />

@@ -55,7 +55,7 @@ export const NewsPage: React.FC = () => {
           >
             <div className="lg:col-span-8 overflow-hidden h-400px md:h-500px">
               <img 
-                src={featured.image ? `http://localhost:8000${featured.image}` : '/placeholder.jpg'} 
+                src={featured.image ? `${import.meta.env.VITE_API_URL_BASE}${featured.image}` : '/placeholder.jpg'} 
                 className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105"
                 alt=""
               />
@@ -90,7 +90,7 @@ export const NewsPage: React.FC = () => {
               <div className="flex flex-col gap-6">
                 <div className="aspect-video overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-700">
                    <img 
-                    src={art.image ? `http://localhost:8000${art.image}` : '/placeholder.jpg'} 
+                    src={art.image ? `${import.meta.env.VITE_API_URL_BASE}${art.image}` : '/placeholder.jpg'} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                     alt="" 
                    />

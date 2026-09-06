@@ -147,7 +147,7 @@ export const EventDetailPage: React.FC = () => {
 
           <div className="shadow-2xl border border-gray-100 overflow-hidden grayscale hover:grayscale-0 transition-all duration-1000">
              <img 
-               src={event.image ? `http://localhost:8000${event.image}` : '/placeholder.jpg'} 
+               src={event.image ? `${import.meta.env.VITE_API_URL_BASE}${event.image}` : '/placeholder.jpg'} 
                className="w-full h-450px object-cover" alt=""
              />
           </div>

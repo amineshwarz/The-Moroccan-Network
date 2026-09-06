@@ -86,7 +86,7 @@ export const AdminEvents: React.FC = () => {
     setCapacity(event.capacity);
     setIsPublished(event.isPublished);
     setPrices(event.prices || [{ category: 'PUBLIC', amount: 0 }]);
-    setImagePreview(event.image ? `http://localhost:8000${event.image}` : null);
+    setImagePreview(event.image ? `${import.meta.env.VITE_API_URL_BASE}${event.image}` : null);
     setIsModalOpen(true);
   };
 
@@ -187,7 +187,7 @@ export const AdminEvents: React.FC = () => {
                 {/* IMAGE CONTAINER */}
                 <div className={`relative overflow-hidden bg-gray-50 shrink-0 ${viewMode === 'grid' ? 'h-56 w-full' : 'h-24 w-24 md:h-32 md:w-32 rounded-2xl'}`}>
                   {event.image ? (
-                    <img src={`http://localhost:8000${event.image}`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="" />
+                    <img src={`${import.meta.env.VITE_API_URL_BASE}${event.image}`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-200"><ImageIcon size={viewMode === 'grid' ? 48 : 24} /></div>
                   )}

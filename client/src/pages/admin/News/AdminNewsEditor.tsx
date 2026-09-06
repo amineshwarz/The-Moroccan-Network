@@ -25,7 +25,7 @@ export const AdminNewsEditor: React.FC = () => {
           setTitle(art.title);
           setContent(art.content);
           setIsPublished(art.isPublished);
-          setImagePreview(art.image ? `http://localhost:8000${art.image}` : null);
+          setImagePreview(art.image ? `${import.meta.env.VITE_API_URL_BASE}${art.image}` : null);
         }
       };
       fetchArticle();

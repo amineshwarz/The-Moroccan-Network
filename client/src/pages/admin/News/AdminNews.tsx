@@ -102,7 +102,7 @@ export const AdminNews: React.FC = () => {
               >
                 <div className={`relative overflow-hidden bg-gray-50 shrink-0 ${viewMode === 'grid' ? 'h-64 w-full' : 'h-24 w-24 md:h-32 md:w-32 rounded-xl'}`}>
                   {art.image ? (
-                    <img src={`http://localhost:8000${art.image}`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="" />
+                    <img src={`${import.meta.env.VITE_API_URL_BASE}${art.image}`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-200"><Newspaper size={viewMode === 'grid' ? 64 : 32} /></div>
                   )}

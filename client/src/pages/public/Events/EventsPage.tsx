@@ -58,7 +58,7 @@ export const EventsPage: React.FC = () => {
               {/* Image sans arrondis pour le côté institutionnel */}
               <div className="h-64 overflow-hidden relative grayscale group-hover:grayscale-0 transition-all duration-700">
                 <img 
-                  src={event.image ? `http://localhost:8000${event.image}` : '/placeholder-event.jpg'} 
+                  src={event.image ? `${import.meta.env.VITE_API_URL_BASE}${event.image}` : '/placeholder-event.jpg'} 
                   alt={event.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />

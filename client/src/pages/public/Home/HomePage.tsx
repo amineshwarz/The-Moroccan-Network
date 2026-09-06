@@ -99,7 +99,7 @@ export const HomePage: React.FC = () => {
             <div className="flex flex-col lg:flex-row items-stretch bg-white border border-gray-200 shadow-sm overflow-hidden">
               <div className="lg:w-1/2 h-400px">
                 <img 
-                  src={nextEvent.image ? `http://localhost:8000${nextEvent.image}` : '/placeholder.jpg'} 
+                  src={nextEvent.image ? `${import.meta.env.VITE_API_URL_BASE}${nextEvent.image}` : '/placeholder.jpg'} 
                   className="w-full h-full object-cover" 
                   alt={nextEvent.title}
                 />
@@ -141,7 +141,7 @@ export const HomePage: React.FC = () => {
               <Link to={`/actualites/${art.slug}`} key={art.id} className="group">
                 <div className="aspect-video bg-gray-100 mb-6 overflow-hidden">
                   <img 
-                    src={art.image ? `http://localhost:8000${art.image}` : '/placeholder.jpg'} 
+                    src={art.image ? `${import.meta.env.VITE_API_URL_BASE}${art.image}` : '/placeholder.jpg'} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                     alt={art.title}
                   />
