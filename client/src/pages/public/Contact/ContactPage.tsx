@@ -57,7 +57,7 @@ export const ContactPage: React.FC = () => {
             <div className="space-y-10">
               {[
                 { icon: <Mail size={18}/>, label: "Email", value: "contact@themoroccannetwork.org" },
-                { icon: <MapPin size={18}/>, label: "Siège", value: "Lyon, France" },
+                { icon: <MapPin size={18}/>, label: "Siège", value: "Bordeaux, France" },
                 { icon: <Globe size={18}/>, label: "Réseau", value: "International" },
               ].map((info, i) => (
                 <div key={i} className="flex items-start gap-6 group">
