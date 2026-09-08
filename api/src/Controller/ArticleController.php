@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller; 
 
-use App\Entity\Article;
+use App\Entity\Article; // entity 
 use App\Repository\ArticleRepository;
 use App\Service\ArticleManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -60,7 +60,7 @@ class ArticleController extends AbstractController
         $data = $request->request->all();
         $imageFile = $request->files->get('image');
         $this->articleManager->save($article, $data, $imageFile, $user);
-        return $this->json(['message' => 'Article mis à jour']);
+        return $this->json(['message' => 'Article mis à jour']); 
     }
 
     #[Route('/{id}', name: 'news_delete', methods: ['DELETE'])]
